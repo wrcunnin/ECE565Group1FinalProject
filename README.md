@@ -1,3 +1,4 @@
+## GROUP 1 README
 Build using:
 
 ```console
@@ -9,7 +10,7 @@ Test run using:
 ./build/ECE565-ARM/gem5.opt configs/example/se.py --cpu-type=MyMinorCPU --maxinsts=1000000 --l1d_size=64kB --l1i_size=16kB --caches --l2cache -c part1/daxpy-armv7-binary
 ```
 
-##BELOW IS BASIC GEM5 README
+## GEM5 README
 
 This is the gem5 simulator.
 
