@@ -10,16 +10,22 @@ namespace myminor
 class LVPT : public Named
 {
 
+protected:
+    unsigned int tableSize;
+    unsigned int inPC;
+    unsigned int outVal;
+    unsigned int tableHit;
 
-unsigned int tableSize;
+    struct tableEntry
+    {
+        unsigned int PC;
+        unsigned int value;
+    }
 
-struct tableEntry
-{
-    int32_t PC;
-    int32_t value;
-}
+    tableEntry table[tablesize];
 
-tableEntry table[tablesize];
+    /** Table access here for given PC */
+    void evaluate();
 
 }
 
