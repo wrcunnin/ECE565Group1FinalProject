@@ -12,17 +12,28 @@ class LVPT : public Named
 
 protected:
     unsigned int tableSize;
+    unsigned int threshold;
+    unsigned int maxValue;
     unsigned int inPC;
     unsigned int outVal;
-    unsigned int tableHit;
+    bool valuePredict;
+
+    unsigned int mispredValue;
+    unsigned int mispredPC;
 
     struct tableEntry
     {
-        unsigned int PC;
+        bool         valid;
+        unsigned int tag;
         unsigned int value;
+        unsigned int addr;
     }
 
-    tableEntry table[tablesize];
+    std::vector<tableEntry> valueTable (tableSize, 0);
+
+    std::vector<unsigned int> predictTable (tableSize / 4, 0);
+
+    void updateTable()
 
     /** Table access here for given PC */
     void evaluate();
