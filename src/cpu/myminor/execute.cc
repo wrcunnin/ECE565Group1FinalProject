@@ -1354,9 +1354,12 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         }
 
         /* Mark the mem inst as being in the LSQ */
-        if (issued_mem_ref) {
+        if (issued_mem_ref && (!inst->staticinst->isLoad() && !constant)) {
             inst->fuIndex = 0;
             inst->inLSQ = true;
+        } else{
+            inst->fuIndex = 0;
+            inst->inLSQ = false;
         }
 
         /* Pop issued (to LSQ) and discarded mem refs from the inFUMemInsts
