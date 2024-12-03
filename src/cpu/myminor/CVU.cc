@@ -52,7 +52,7 @@ CVU::storeInvalidate(unsigned int address)
 {
   for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
       tableEntry entry = cvuTable[hitIndex];
-      if(entry.address == address){
+      if(entry.addr == address){
           entry.valid = false;
       }
 }
@@ -60,7 +60,7 @@ CVU::storeInvalidate(unsigned int address)
 
 
 void
-CVU::evaluate()
+CVU::verifyEntryInCVU(unsigned int address, unsigned int index)
 {
   // declarations
   unsigned int hitIndex = tableSize;
