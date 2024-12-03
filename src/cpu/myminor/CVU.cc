@@ -26,15 +26,43 @@ namespace myminor
 
 CVU::CVU(const BaseMyMinorCPUParams &params,
   unsigned int inPC_,
+  unsigned int inAddr_,
+  unsigned int inIndexLVPT_,,
+  bool constant_,
+  bool isStore_,
   unsigned int outValue_,
-  bool valuePredict_) :
+  bool verifyPrediction_) :
   tableSize(params.tableSize),
   threshold(params.thresholdLCT),
   maxValue(params.maxValueLCT),
   inPC(inPC_),
+  inAddr(inAddr_),
+  inIndexLVPT(inIndexLVPT_),
+  constant(constant_),
+  isStore(isStore_),
   outValue(outValue_),
-  valuePredict(valuePredict_)
+  verifyPrediction(verifyPrediction_)
 {
+
+}
+
+void
+CVU::evaluate()
+{
+  // declarations
+  unsigned int hitIndex = tableSize;
+
+  // go through each frame
+  if (constant) {
+    for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
+      tableEntry entry = cvuTable[hitIndex];
+      if (entry.valid && (entry.addr == inAddr) && (entry.index == inIndexLVPT)) {
+        break;
+      }
+    }
+  }
+
+  verifyPrediction = hitIndex < tableSize;
 }
 
 }

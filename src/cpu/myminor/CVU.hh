@@ -13,19 +13,31 @@ protected:
     unsigned int threshold;
     unsigned int maxValue;
     unsigned int inPC;
+    unsigned int inAddr;
+    unsigned int inIndexLVPT;
+    bool constant;
+    bool isStore;
+
     unsigned int outVal;
-    bool valuePredict;
+    bool verifyPrediction;
 
     unsigned int mispredValue;
     unsigned int mispredPC;
 
     struct tableEntry
     {
-        unsigned int value;
+        bool         valid;
         unsigned int addr;
+        unsigned int index;
+        unsigned int data;
     }
 
-    std::vector<tableEntry> valueTable (tableSize, 0);
+    std::vector<tableEntry> cvuTable (tableSize, 0);
+
+    void storeInvalidate()
+    {
+
+    }
 
     /** Table access here for given PC */
     void evaluate();

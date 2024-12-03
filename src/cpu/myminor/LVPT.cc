@@ -27,18 +27,20 @@ namespace myminor
 LVPT::LVPT(const BaseMyMinorCPUParams &params,
   unsigned int inPC_,
   unsigned int outValue_,
-  bool valuePredict_) :
+  unsigned int outIndexLVPT_,
+  bool valuePredict_,
+  bool constant_) :
   tableSize(params.tableSize),
   threshold(params.thresholdLCT),
   maxValue(params.maxValueLCT),
   inPC(inPC_),
   outValue(outValue_),
-  valuePredict(valuePredict_)
+  outIndexLVPT(outIndexLVPT_),
+  valuePredict(valuePredict_),
+  constant(constant_)
 {
   if (threshold > maxValue)
     fatal("LVPT: thresholdLCT (%d) must be <= maxValueLCT (%d)", threshold, maxValue);
-
-  
 }
 
 void
@@ -58,7 +60,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mi
   // on store
   if (store)
   {
-    // drop for  now
+    // drop for now
   }
   else if (mispredict)
   {
@@ -95,14 +97,18 @@ LVPT::evaluate()
 
   // check if valid and right PC
   outVal = 0;
-  tableHit = false;
+  outIndexLVPT = 0;
+  valuePredict = false;
+  constant = false;
   // if entry in table is valid and matches
   if (entry.valid && entry.tag == tag)
   {
     // if prediction is above the threshold
+    outVal = entry.value;
+    outIndexLVPT = index;
+    valuePredict = true;
     if (predict >= threshhold) {
-      outVal = entry.value;
-      valuePredict = true;
+      constant = true;
     }
   }
 }

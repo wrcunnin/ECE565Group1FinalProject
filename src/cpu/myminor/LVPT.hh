@@ -16,7 +16,9 @@ protected:
     unsigned int maxValue;
     unsigned int inPC;
     unsigned int outVal;
+    unsigned int outIndexLVPT;
     bool valuePredict;
+    bool constant;
 
     unsigned int mispredValue;
     unsigned int mispredPC;
@@ -25,8 +27,8 @@ protected:
     {
         bool         valid;
         unsigned int tag;
-        unsigned int value;
         unsigned int addr;
+        unsigned int value;
     }
 
     std::vector<tableEntry> valueTable (tableSize, 0);
