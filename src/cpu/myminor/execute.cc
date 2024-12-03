@@ -374,7 +374,6 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
         DPRINTF(MyMinorMem, "Memory response inst: %s addr: 0x%x size: %d\n",
             *inst, packet->getAddr(), packet->getSize());
-
         if (is_load && packet->getSize() > 0) {
             DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n",
                 static_cast<unsigned int>(packet->getConstPtr<uint8_t>()[0]));
@@ -392,7 +391,9 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         } else {
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
+            
             if (response->needsToBeSentToStoreBuffer())
+                CVU::storeInvalidate(packet->getAddr());
                 lsq.sendStoreToStoreBuffer(response);
         }
     } else {
@@ -456,6 +457,12 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
     /* Set to true if the mem op. is issued and sent to the mem system */
     passed_predicate = false;
 
+    if(inst->staticinst->isLoad() && constant){
+        issued = true;
+    } else {
+
+    
+
     if (!lsq.canRequest()) {
         /* Not acting on instruction yet as the memory
          * queues are full */
@@ -515,6 +522,7 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
         /* Restore thread PC */
         thread->pcState(*old_pc);
         issued = true;
+    }
     }
 
     return issued;
@@ -919,6 +927,8 @@ Execute::commitInst(MyMinorDynInstPtr inst, bool early_memory_issue,
         inst->fault->invoke(thread, NULL);
 
         tryToBranch(inst, fault, branch);
+    } else if (inst->staticInst->isMemRef() && inst->staticInst->isLoad() && constant){ // set necessary outputs for completing mem instruction
+        completed_inst = true;
     } else if (inst->staticInst->isMemRef()) {
         /* Memory accesses are executed in two parts:
          *  executeMemRefInst -- calculates the EA and issues the access
@@ -1124,6 +1134,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         /* Can we find a mem response for this inst */
         LSQ::LSQRequestPtr mem_response =
             (inst->inLSQ ? lsq.findResponse(inst) : NULL);
+
+        //If constant and load then set mem_reponse to be that value
+
 
         DPRINTF(MyMinorExecute, "Trying to commit canCommitInsts: %d\n",
             can_commit_insts);
