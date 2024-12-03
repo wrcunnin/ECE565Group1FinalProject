@@ -34,11 +34,11 @@ protected:
 
     std::vector<tableEntry> cvuTable (tableSize, 0);
 
-    void storeInvalidate();
+    void storeInvalidate(unsigned int);
     // Invalidate all matching addresses on a store
 
     /** Table access here for given PC */
-    void evaluate();
+    void verifyEntryInCVU(unsigned int address, unsigned int index);
 
 }
 }
