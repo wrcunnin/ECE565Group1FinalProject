@@ -1,3 +1,15 @@
+#ifndef __CPU_MYMINOR_CVU_HH__
+#define __CPU_MYMINOR_CVU_HH__
+
+#include <vector>
+
+#include "arch/generic/mmu.hh"
+#include "base/named.hh"
+#include "cpu/base.hh"
+#include "cpu/myminor/buffers.hh"
+#include "cpu/myminor/cpu.hh"
+#include "cpu/myminor/pipe_data.hh"
+
 namespace gem5
 {
 
@@ -12,17 +24,6 @@ protected:
     unsigned int tableSize;
     unsigned int threshold;
     unsigned int maxValue;
-    unsigned int inPC;
-    unsigned int inAddr;
-    unsigned int inIndexLVPT;
-    bool constant;
-    bool isStore;
-
-    unsigned int outVal;
-    bool verifyPrediction;
-
-    unsigned int mispredValue;
-    unsigned int mispredPC;
 
     struct tableEntry
     {
@@ -34,7 +35,7 @@ protected:
 
     std::vector<tableEntry> cvuTable (tableSize, 0);
 
-    void storeInvalidate(unsigned int);
+    void storeInvalidate(unsigned int address);
     // Invalidate all matching addresses on a store
 
     /** Table access here for given PC */
@@ -43,3 +44,5 @@ protected:
 }
 }
 }
+
+#endif /* __CPU_MYMINOR_CVU_HH__ */

@@ -24,43 +24,27 @@ GEM5_DEPRECATED_NAMESPACE(MyMinor, myminor);
 namespace myminor
 {
 
-CVU::CVU(const BaseMyMinorCPUParams &params,
-  unsigned int inPC_,
-  unsigned int inAddr_,
-  unsigned int inIndexLVPT_,,
-  bool constant_,
-  bool isStore_,
-  unsigned int outValue_,
-  bool verifyPrediction_) :
+CVU::CVU(const BaseMyMinorCPUParams &params) :
   tableSize(params.tableSize),
   threshold(params.thresholdLCT),
   maxValue(params.maxValueLCT),
-  inPC(inPC_),
-  inAddr(inAddr_),
-  inIndexLVPT(inIndexLVPT_),
-  constant(constant_),
-  isStore(isStore_),
-  outValue(outValue_),
-  verifyPrediction(verifyPrediction_)
 {
 
 }
-
 
 void
 CVU::storeInvalidate(unsigned int address)
 {
   for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
-      tableEntry entry = cvuTable[hitIndex];
-      if(entry.addr == address){
-          entry.valid = false;
-      }
+    tableEntry entry = cvuTable[hitIndex];
+    if(entry.addr == address){
+        entry.valid = false;
+    }
+  }
 }
 
-
-
-void
-CVU::verifyEntryInCVU(unsigned int address, unsigned int index)
+bool
+CVU::verifyEntryInCVU(unsigned int address, unsigned int index, bool constant)
 {
   // declarations
   unsigned int hitIndex = tableSize;
@@ -69,13 +53,13 @@ CVU::verifyEntryInCVU(unsigned int address, unsigned int index)
   if (constant) {
     for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
       tableEntry entry = cvuTable[hitIndex];
-      if (entry.valid && (entry.addr == inAddr) && (entry.index == inIndexLVPT)) {
+      if (entry.valid && (entry.addr == address) && (entry.index == index)) {
         break;
       }
     }
   }
 
-  verifyPrediction = hitIndex < tableSize;
+  return hitIndex < tableSize;
 }
 
 }
