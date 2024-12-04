@@ -53,6 +53,7 @@
 #include "cpu/myminor/buffers.hh"
 #include "cpu/myminor/cpu.hh"
 #include "cpu/myminor/pipe_data.hh"
+#include "cpu/myminor/LVPT.hh"
 #include "mem/packet.hh"
 
 namespace gem5
@@ -318,6 +319,9 @@ class Fetch1 : public Named
      *  All requests so located *must* have reserved space in the
      *  transfers queue */
     unsigned int numFetchesInITLB;
+
+    /** Load Value Predictor Table + LCT */
+    LVPT lvpt;
 
   protected:
     friend std::ostream &operator <<(std::ostream &os,

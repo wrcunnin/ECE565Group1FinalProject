@@ -24,20 +24,10 @@ GEM5_DEPRECATED_NAMESPACE(MyMinor, myminor);
 namespace myminor
 {
 
-LVPT::LVPT(const BaseMyMinorCPUParams &params,
-  unsigned int inPC_,
-  unsigned int outValue_,
-  unsigned int outIndexLVPT_,
-  bool valuePredict_,
-  bool constant_) :
+LVPT::LVPT(const BaseMyMinorCPUParams &params) :
   tableSize(params.tableSize),
   threshold(params.thresholdLCT),
-  maxValue(params.maxValueLCT),
-  inPC(inPC_),
-  outValue(outValue_),
-  outIndexLVPT(outIndexLVPT_),
-  valuePredict(valuePredict_),
-  constant(constant_)
+  maxValue(params.maxValueLCT)
 {
   if (threshold > maxValue)
     fatal("LVPT: thresholdLCT (%d) must be <= maxValueLCT (%d)", threshold, maxValue);
@@ -81,36 +71,36 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mi
   }
 }
 
-void
-LVPT::evaluate()
+lvptData
+LVPT::read(unsigned int pc)
 {
   // value table
   unsigned int numIndexBits = log2(tableSize);
   unsigned int numLCTBits = numIndexBits - 2;
   unsigned int indexMask = ((0x1 << numIndexBits) - 1);
-  unsigned int index = (inPC) & indexMask;
-  unsigned int indexLCT = inPC >> (32 - numLCTBits);
-  unsigned int tag = (inPC) & ~indexMask;
+  unsigned int index = (pc) & indexMask;
+  unsigned int indexLCT = pc >> (32 - numLCTBits);
+  unsigned int tag = (pc) & ~indexMask;
 
   tableEntry entry = valueTable[index];
   unsigned int predict = predictTable[indexLCT];
 
   // check if valid and right PC
-  outVal = 0;
-  outIndexLVPT = 0;
-  valuePredict = false;
-  constant = false;
+  lvptData outData = {0};
   // if entry in table is valid and matches
   if (entry.valid && entry.tag == tag)
   {
     // if prediction is above the threshold
-    outVal = entry.value;
-    outIndexLVPT = index;
-    valuePredict = true;
+    outData.predict = true;
+    outData.value   = entry.value;
+    outData.pc      = pc;
+    outData.index   = index;
     if (predict >= threshhold) {
-      constant = true;
+      outData.constant = true;
     }
   }
+
+  return outData;
 }
 
 }

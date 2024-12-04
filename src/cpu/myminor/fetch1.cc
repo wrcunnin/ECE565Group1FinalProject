@@ -82,7 +82,8 @@ Fetch1::Fetch1(const std::string &name_,
     icacheState(IcacheRunning),
     lineSeqNum(InstId::firstLineSeqNum),
     numFetchesInMemorySystem(0),
-    numFetchesInITLB(0)
+    numFetchesInITLB(0),
+    lvpt(params)
 {
     for (auto &info: fetchInfo)
         info.pc.reset(params.isa[0]->newPCState());
@@ -553,6 +554,8 @@ Fetch1::processResponse(Fetch1::FetchRequestPtr response,
     set(line.pc, thread.pc);
     /* Set fetch address to virtual address */
     line.fetchAddr = response->pc;
+    /* Get LVPT output */
+    line.lvptOut = lvpt.read(line.fetchAddr);
     /* Set the lineBase, which is a sizeof(MachInst) aligned address <=
      *  pc.instAddr() */
     line.lineBaseAddr = response->request->getVaddr();

@@ -53,6 +53,7 @@
 #include "cpu/base.hh"
 #include "cpu/myminor/buffers.hh"
 #include "cpu/myminor/dyn_inst.hh"
+#include "cpu/myminor/LVPT.hh"
 
 namespace gem5
 {
@@ -205,6 +206,9 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
 
     /** Explicit line width, don't rely on data.size */
     unsigned int lineWidth = 0;
+
+    /** Output of LVPT for PC */
+    lvptData lvptOut;
 
   public:
     /** This line has a fault.  The bubble flag will be false and seqNums

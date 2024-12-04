@@ -54,6 +54,7 @@
 #include "base/types.hh"
 #include "cpu/inst_seq.hh"
 #include "cpu/myminor/buffers.hh"
+#include "cpu/myminor/lvpt.hh"
 #include "cpu/static_inst.hh"
 #include "cpu/timing_expr.hh"
 #include "sim/faults.hh"
@@ -180,6 +181,9 @@ class MyMinorDynInst : public RefCounted
 
     /** This is actually a fault masquerading as an instruction */
     Fault fault;
+
+    /** For LVPT information */
+    lvptData lvptOut;
 
     /** Tried to predict the destination of this inst (if a control
      *  instruction or a sys call) */

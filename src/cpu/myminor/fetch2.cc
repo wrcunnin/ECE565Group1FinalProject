@@ -405,6 +405,10 @@ Fetch2::evaluate()
                     /* Fetch and prediction sequence numbers originate here */
                     dyn_inst->id.fetchSeqNum = fetch_info.fetchSeqNum;
                     dyn_inst->id.predictionSeqNum = fetch_info.predictionSeqNum;
+
+                    /* pass along LVPT info */
+                    dyn_inst->lvptOut = *inp.outputWire.lvptOut
+
                     /* To complete the set, test that exec sequence number
                      *  has not been set */
                     assert(dyn_inst->id.execSeqNum == 0);
@@ -542,6 +546,7 @@ Fetch2::evaluate()
         cpu.activityRecorder->activity();
         insts_out.threadId = tid;
         nextStageReserve[tid].reserve();
+        insts_out.lvptOut = *inp.outputWire.lvptOut;
     }
 
     /* If we still have input to process and somewhere to put it,

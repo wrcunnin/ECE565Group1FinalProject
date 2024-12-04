@@ -1,3 +1,16 @@
+#ifndef __CPU_MYMINOR_LVPT_HH__
+#define __CPU_MYMINOR_LVPT_HH__
+
+#include <vector>
+
+#include "arch/generic/mmu.hh"
+#include "base/named.hh"
+#include "cpu/base.hh"
+#include "cpu/myminor/buffers.hh"
+#include "cpu/myminor/cpu.hh"
+#include "cpu/myminor/pipe_data.hh"
+
+
 namespace gem5
 {
 
@@ -14,14 +27,6 @@ protected:
     unsigned int tableSize;
     unsigned int threshold;
     unsigned int maxValue;
-    unsigned int inPC;
-    unsigned int outVal;
-    unsigned int outIndexLVPT;
-    bool valuePredict;
-    bool constant;
-
-    unsigned int mispredValue;
-    unsigned int mispredPC;
 
     struct tableEntry
     {
@@ -29,18 +34,29 @@ protected:
         unsigned int tag;
         unsigned int addr;
         unsigned int value;
-    }
+    };
+
+    struct lvptData
+    {
+        bool constant;
+        bool predict;
+        unsigned int value;
+        unsigned int pc;
+        unsigned int index;
+    };
 
     std::vector<tableEntry> valueTable (tableSize, 0);
 
     std::vector<unsigned int> predictTable (tableSize / 4, 0);
 
-    void updateTable()
+    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mispredict)
 
     /** Table access here for given PC */
-    void evaluate();
+    lvptData read(unsigned int pc);
 
 }
 
 }
 }
+
+#endif /* __CPU_MYMINOR_LVPT_HH__ */

@@ -170,6 +170,9 @@ ExecuteDummy::evaluate()
                 /* Set execSeqNum of output_inst */
                 output_inst->id.execSeqNum = executeDummy_info.execSeqNum;
 
+                /* Set lvptOut of output_inst */
+                output_inst->lvptOut = *inp.outputWire.lvptOut;
+
                 /* Correctly size the output before writing */
                 if (output_index == 0) insts_out.resize(outputWidth);
 
