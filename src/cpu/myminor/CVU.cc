@@ -35,7 +35,7 @@ CVU::CVU(const BaseMyMinorCPUParams &params) :
 void
 CVU::storeInvalidate(unsigned int address)
 {
-  for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
+  for (unsigned int hitIndex = 0; hitIndex < tableSize; hitIndex++) {
     tableEntry entry = cvuTable[hitIndex];
     if(entry.addr == address){
         entry.valid = false;
