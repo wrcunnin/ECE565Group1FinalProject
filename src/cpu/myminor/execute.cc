@@ -93,7 +93,8 @@ Execute::Execute(const std::string &name_,
             ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
     issuePriority(0),
-    commitPriority(0)
+    commitPriority(0),
+    cvu(params.tableSize, params.threshold, params.maxValue)
 {
     if (commitLimit < 1) {
         fatal("%s: executeCommitLimit must be >= 1 (%d)\n", name_,
@@ -331,12 +332,13 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
     ExecContext context(cpu, *cpu.threads[thread_id], *this, inst);
 
-    PacketPtr packet = response->packet;
+    PacketPtr packet = response ? response->packet : NULL;
 
     bool is_load = inst->staticInst->isLoad();
     bool is_store = inst->staticInst->isStore();
     bool is_atomic = inst->staticInst->isAtomic();
     bool is_prefetch = inst->staticInst->isDataPrefetch();
+    bool is_constant = inst->lvptOut.constant;
 
     /* If true, the trace's predicate value will be taken from the exec
      *  context predicate, otherwise, it will be set to false */
@@ -358,13 +360,13 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
             fault->invoke(thread, inst->staticInst);
         }
-    } else if (!packet) {
+    } else if (!is_constant && !packet) {
         DPRINTF(MyMinorMem, "Completing failed request inst: %s\n",
             *inst);
         use_context_predicate = false;
         if (!context.readMemAccPredicate())
             inst->staticInst->completeAcc(nullptr, &context, inst->traceData);
-    } else if (packet->isError()) {
+    } else if (!is_constant && packet->isError()) {
         DPRINTF(MyMinorMem, "Trying to commit error response: %s\n",
             *inst);
 
@@ -374,13 +376,15 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
         DPRINTF(MyMinorMem, "Memory response inst: %s addr: 0x%x size: %d\n",
             *inst, packet->getAddr(), packet->getSize());
-        if (is_load && packet->getSize() > 0) {
+        if (is_load && is_constant) {
+            DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n", inst->lvptOut.value);
+        } else if (is_load && packet->getSize() > 0) {
             DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n",
                 static_cast<unsigned int>(packet->getConstPtr<uint8_t>()[0]));
         }
 
         /* Complete the memory access instruction */
-        fault = inst->staticInst->completeAcc(packet, &context,
+        fault = is_load && is_constant ? NoFault : inst->staticInst->completeAcc(packet, &context,
             inst->traceData);
 
         if (fault != NoFault) {
@@ -392,8 +396,8 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
             
-            if (response->needsToBeSentToStoreBuffer())
-                CVU::storeInvalidate(packet->getAddr());
+            if (!(is_load && is_constant) && response && response->needsToBeSentToStoreBuffer())
+                cvu.storeInvalidate(packet->getAddr());
                 lsq.sendStoreToStoreBuffer(response);
         }
     } else {
@@ -401,7 +405,10 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             "writes or faults at this point\n");
     }
 
-    lsq.popResponse(response);
+    /* Do not pop response if inst is a load and is a constant.
+    *  Instruction will NOT be in the queue */
+    if (!(is_load && is_constant))
+        lsq.popResponse(response);
 
     if (inst->traceData) {
         inst->traceData->setPredicate((use_context_predicate ?
@@ -457,72 +464,70 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
     /* Set to true if the mem op. is issued and sent to the mem system */
     passed_predicate = false;
 
-    if(inst->staticinst->isLoad() && constant){
+    if(inst->staticinst->isLoad() && inst->lvptOut.constant){
+        thread->pcState(*old_pc); // not sure if needed???
         issued = true;
     } else {
-
-    
-
-    if (!lsq.canRequest()) {
-        /* Not acting on instruction yet as the memory
-         * queues are full */
-        issued = false;
-    } else {
-        ThreadContext *thread = cpu.getContext(inst->id.threadId);
-        std::unique_ptr<PCStateBase> old_pc(thread->pcState().clone());
-
-        ExecContext context(cpu, *cpu.threads[inst->id.threadId], *this, inst);
-
-        DPRINTF(MyMinorExecute, "Initiating memRef inst: %s\n", *inst);
-
-        Fault init_fault = inst->staticInst->initiateAcc(&context,
-            inst->traceData);
-
-        if (inst->inLSQ) {
-            if (init_fault != NoFault) {
-                assert(inst->translationFault != NoFault);
-                // Translation faults are dealt with in handleMemResponse()
-                init_fault = NoFault;
-            } else {
-                // If we have a translation fault then it got suppressed  by
-                // initateAcc()
-                inst->translationFault = NoFault;
-            }
-        }
-
-        if (init_fault != NoFault) {
-            DPRINTF(MyMinorExecute, "Fault on memory inst: %s"
-                " initiateAcc: %s\n", *inst, init_fault->name());
-            fault = init_fault;
+        if (!lsq.canRequest()) {
+            /* Not acting on instruction yet as the memory
+            * queues are full */
+            issued = false;
         } else {
-            /* Only set this if the instruction passed its
-             * predicate */
-            if (!context.readMemAccPredicate()) {
-                DPRINTF(MyMinorMem, "No memory access for inst: %s\n", *inst);
-                assert(context.readPredicate());
-            }
-            passed_predicate = context.readPredicate();
+            ThreadContext *thread = cpu.getContext(inst->id.threadId);
+            std::unique_ptr<PCStateBase> old_pc(thread->pcState().clone());
 
-            /* Set predicate in tracing */
-            if (inst->traceData)
-                inst->traceData->setPredicate(passed_predicate);
+            ExecContext context(cpu, *cpu.threads[inst->id.threadId], *this, inst);
 
-            /* If the instruction didn't pass its predicate
-             * or it is a predicated vector instruction and the
-             * associated predicate register is all-false (and so will not
-             * progress from here)  Try to branch to correct and branch
-             * mis-prediction. */
-            if (!inst->inLSQ) {
-                /* Leave it up to commit to handle the fault */
-                lsq.pushFailedRequest(inst);
-                inst->inLSQ = true;
+            DPRINTF(MyMinorExecute, "Initiating memRef inst: %s\n", *inst);
+
+            Fault init_fault = inst->staticInst->initiateAcc(&context,
+                inst->traceData);
+
+            if (inst->inLSQ) {
+                if (init_fault != NoFault) {
+                    assert(inst->translationFault != NoFault);
+                    // Translation faults are dealt with in handleMemResponse()
+                    init_fault = NoFault;
+                } else {
+                    // If we have a translation fault then it got suppressed  by
+                    // initateAcc()
+                    inst->translationFault = NoFault;
+                }
             }
+
+            if (init_fault != NoFault) {
+                DPRINTF(MyMinorExecute, "Fault on memory inst: %s"
+                    " initiateAcc: %s\n", *inst, init_fault->name());
+                fault = init_fault;
+            } else {
+                /* Only set this if the instruction passed its
+                * predicate */
+                if (!context.readMemAccPredicate()) {
+                    DPRINTF(MyMinorMem, "No memory access for inst: %s\n", *inst);
+                    assert(context.readPredicate());
+                }
+                passed_predicate = context.readPredicate();
+
+                /* Set predicate in tracing */
+                if (inst->traceData)
+                    inst->traceData->setPredicate(passed_predicate);
+
+                /* If the instruction didn't pass its predicate
+                * or it is a predicated vector instruction and the
+                * associated predicate register is all-false (and so will not
+                * progress from here)  Try to branch to correct and branch
+                * mis-prediction. */
+                if (!inst->inLSQ) {
+                    /* Leave it up to commit to handle the fault */
+                    lsq.pushFailedRequest(inst);
+                    inst->inLSQ = true;
+                }
+            }
+
+            /* Restore thread PC */
+            thread->pcState(*old_pc);
+            issued = true;
         }
-
-        /* Restore thread PC */
-        thread->pcState(*old_pc);
-        issued = true;
-    }
     }
 
     return issued;
