@@ -412,7 +412,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
                 // Add to CVU
         // else (MEM Data != prediction)
         } else {
-            change_counter 2;
+            change_counter = 2;
         }
             // decrease counter in LVPT
 
@@ -427,7 +427,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
              *  them off */
             
             if (!(is_load && is_constant) && response && response->needsToBeSentToStoreBuffer())
-                cvu.storeInvalidate(packet->getAddr());
+                cvu.storeInvalidate(packet->getAddr()); //get the virtual address here!!
                 lsq.sendStoreToStoreBuffer(response);
         }
     } else {
