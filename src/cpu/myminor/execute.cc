@@ -405,7 +405,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             // Increase counter in LVPT
             change_counter = 1;
             // If threshhold is now at constant value
-                cvu.AddEntryToCVU(*packetdataptr, lvpt_index, response->getAddr());
+                lsq.cvu.AddEntryToCVU(*packetdataptr, lvpt_index, response->getAddr());
                 // Add to CVU
         // else (MEM Data != prediction)
         } else {
@@ -420,10 +420,17 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         } else {
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
-            
-            if (response->needsToBeSentToStoreBuffer())
-                cvu.storeInvalidate(response->getAddr()); //get the virtual address here!!
+            if (response->needsToBeSentToStoreBuffer()) {
+                lsq.cvu.storeInvalidate(response->getAddr()); //get the virtual address here!!
                 lsq.sendStoreToStoreBuffer(response);
+            }
+            
+            /* update outputs to LVPT */
+            out.lvptIn.pc = inst->pc->instAddr();
+            out.lvptIn.addr = (unsigned int) (response->getAddr());
+            out.lvptIn.value = (unsigned int) (*packetdataptr);      
+            out.lvptIn.predict = change_counter == 1; // this should increase the counter
+            out.lvptIn.constant = change_counter == 0; // this should not change the counter
         }
     } else {
         fatal("There should only ever be reads, "

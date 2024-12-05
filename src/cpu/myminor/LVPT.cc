@@ -61,7 +61,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
     valueTable[index] = entry;
 
   }
-  else)
+  else
   {
     // update LCT
     predictTable[indexLCT] = predict >= maxValue ? predict : predict + 1;
