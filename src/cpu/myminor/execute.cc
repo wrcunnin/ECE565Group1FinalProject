@@ -393,6 +393,30 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         fault = is_load && is_constant ? NoFault : inst->staticInst->completeAcc(packet, &context,
             inst->traceData);
 
+        uint8_t* packetdataptr = packet->data; //maybe??? I think???
+        //Counter defintions
+        // 0 no change to counter
+        // 1 increase counter 
+        // 2 Decrease counter
+        change_counter = 0;
+        // LVPT pc to update
+        access_pc = passed_lvpt_pc;
+
+
+        // If MEM Data == prediction
+        if (*packetdataptr == prediction){ //change prediciton to something real
+            // Increase counter in LVPT
+            change_counter = 1;
+            // If threshhold is now at constant value
+                CVU::AddEntryToCVU(*packetdataptr, lvpt_index, translated_data_addr);
+                // Add to CVU
+        // else (MEM Data != prediction)
+        } else {
+            change_counter 2;
+        }
+            // decrease counter in LVPT
+
+
         if (fault != NoFault) {
             /* Invoke fault created by instruction completion */
             DPRINTF(MyMinorMem, "Fault in memory completeAcc: %s\n",
