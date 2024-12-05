@@ -420,7 +420,9 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         } else {
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
+            
             if (response->needsToBeSentToStoreBuffer())
+                cvu.storeInvalidate(response->getAddr()); //get the virtual address here!!
                 lsq.sendStoreToStoreBuffer(response);
         }
     } else {
