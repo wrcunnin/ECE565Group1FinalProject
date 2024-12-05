@@ -56,6 +56,8 @@ if env['CONF']['TARGET_ISA'] != 'null':
     Source('fetch2.cc')
     Source('func_unit.cc')
     Source('lsq.cc')
+    Source('LVPT.cc')
+    Source('CVU.cc')
     Source('pipe_data.cc')
     Source('pipeline.cc')
     Source('scoreboard.cc')
