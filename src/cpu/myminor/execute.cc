@@ -43,6 +43,7 @@
 #include "cpu/myminor/exec_context.hh"
 #include "cpu/myminor/fetch1.hh"
 #include "cpu/myminor/lsq.hh"
+#include "cpu/myminor/CVU.hh"
 #include "cpu/op_class.hh"
 #include "debug/Activity.hh"
 #include "debug/Branch.hh"
@@ -88,13 +89,18 @@ Execute::Execute(const std::string &name_,
         params.executeLSQRequestsQueueSize,
         params.executeLSQTransfersQueueSize,
         params.executeLSQStoreBufferSize,
-        params.executeLSQMaxStoreBufferStoresPerCycle),
+        params.executeLSQMaxStoreBufferStoresPerCycle,
+        params.tableSize,
+        params.threshold,
+        params.maxValue),
     executeInfo(params.numThreads,
             ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
     issuePriority(0),
     commitPriority(0),
-    cvu(params.tableSize, params.threshold, params.maxValue)
+    cvu(params.tableSize,
+        params.threshold,
+        params.maxValue)
 {
     if (commitLimit < 1) {
         fatal("%s: executeCommitLimit must be >= 1 (%d)\n", name_,
@@ -461,10 +467,10 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
 {
     bool issued = false;
 
-    /* Set to true if the mem op. is issued and sent to the mem system */
+    /* Set to true if the mem op is issued and sent to the mem system */
     passed_predicate = false;
 
-    if(inst->staticinst->isLoad() && inst->lvptOut.constant){
+    if(inst->staticinst->isLoad() && inst->lvptOut.constant) {
         thread->pcState(*old_pc); // not sure if needed???
         issued = true;
     } else {
@@ -591,6 +597,10 @@ Execute::issue(ThreadID thread_id)
         Fault fault = inst->fault;
         bool discarded = false;
         bool issued_mem_ref = false;
+        /* Check if instruction is load, is constant, and is in CVU */
+        bool is_in_CVU =
+            inst->staticInsts->is_load() && inst->lvptOut.constant &&
+            cvu.verifyEntryInCVU(inst->lvptOut.address, inst->lvptOut.index);
 
         if (inst->isBubble()) {
             /* Skip */
@@ -932,8 +942,6 @@ Execute::commitInst(MyMinorDynInstPtr inst, bool early_memory_issue,
         inst->fault->invoke(thread, NULL);
 
         tryToBranch(inst, fault, branch);
-    } else if (inst->staticInst->isMemRef() && inst->staticInst->isLoad() && constant){ // set necessary outputs for completing mem instruction
-        completed_inst = true;
     } else if (inst->staticInst->isMemRef()) {
         /* Memory accesses are executed in two parts:
          *  executeMemRefInst -- calculates the EA and issues the access
@@ -1141,7 +1149,8 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
             (inst->inLSQ ? lsq.findResponse(inst) : NULL);
 
         //If constant and load then set mem_reponse to be that value
-
+        bool constant_mem_response =
+            inst->staticInst->isLoad() && inst->lvptOut.constant && cvu.verifyEntryInCVU(inst->lvptOut.address, inst->lvptOut.index, inst->lvptOut.iconstant);
 
         DPRINTF(MyMinorExecute, "Trying to commit canCommitInsts: %d\n",
             can_commit_insts);

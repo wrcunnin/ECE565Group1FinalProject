@@ -53,6 +53,7 @@
 #include "cpu/myminor/cpu.hh"
 #include "cpu/myminor/func_unit.hh"
 #include "cpu/myminor/lsq.hh"
+#include "cpu/myminor/CVU.hh"
 #include "cpu/myminor/pipe_data.hh"
 #include "cpu/myminor/scoreboard.hh"
 

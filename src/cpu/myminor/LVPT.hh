@@ -42,6 +42,7 @@ protected:
         bool predict;
         unsigned int value;
         unsigned int pc;
+        unsigned int addr;
         unsigned int index;
     };
 

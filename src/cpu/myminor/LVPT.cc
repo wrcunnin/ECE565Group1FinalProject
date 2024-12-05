@@ -95,6 +95,7 @@ LVPT::read(unsigned int pc)
     outData.value   = entry.value;
     outData.pc      = pc;
     outData.index   = index;
+    outData.addr    = entry.addr;
     if (predict >= threshhold) {
       outData.constant = true;
     }
