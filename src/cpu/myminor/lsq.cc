@@ -1594,6 +1594,8 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
 
     bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
 
+    bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOut.index);
+
     if (needs_burst && inst->staticInst->isAtomic()) {
         // AMO requests that access across a cache line boundary are not
         // allowed since the cache does not guarantee AMO ops to be executed
@@ -1629,6 +1631,12 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
         }
     }
 
+    /* check for value in CVU if load and constant */
+    if (isLoad && inst->lvptOut.constant && entry_in_CVU) {
+        /* use predicted value for this */
+        request_data = inst->lvptOut.value;
+    }
+
     if (needs_burst) {
         request = new SplitDataRequest(
             *this, inst, isLoad, request_data, res);
@@ -1656,9 +1664,19 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
             [] (ThreadContext *tc, PacketPtr pkt) { return Cycles(1); });
     }
 
+    /* check for value in CVU if load and constant */
+    if (isLoad && inst->lvptOut.constant && entry_in_CVU) {
+        /* set request to complete */
+        request->setState(LSQRequest::Complete);
+    }
+    
     requests.push(request);
     inst->inLSQ = true;
-    request->startAddrTranslation();
+
+    /* only start translation if value is not in the CVU */
+    if (!(isLoad && inst->lvptOut.constant && entry_in_CVU)) {
+        request->startAddrTranslation();
+    }
 
     return inst->translationFault;
 }

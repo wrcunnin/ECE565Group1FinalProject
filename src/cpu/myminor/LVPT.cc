@@ -34,7 +34,7 @@ LVPT::LVPT(const BaseMyMinorCPUParams &params) :
 }
 
 void
-LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mispredict)
+LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict)
 {
   // value table
   unsigned int numIndexBits = log2(tableSize);
@@ -47,12 +47,8 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mi
   tableEntry entry = valueTable[index];
   unsigned int predict = predictTable[indexLCT];
 
-  // on store
-  if (store)
-  {
-    // drop for now
-  }
-  else if (mispredict)
+  // on a mispredict
+  if (~predict)
   {
     // update LCT
     predictTable[indexLCT] = predict == 0 ? 0 : predict - 1;
@@ -61,10 +57,11 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mi
     entry.valid = true;
     entry.value = data;
     entry.addr  = addr;
+    entry.tag   = tag;
     valueTable[index] = entry;
 
   }
-  else
+  else)
   {
     // update LCT
     predictTable[indexLCT] = predict >= maxValue ? predict : predict + 1;

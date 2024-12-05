@@ -705,6 +705,10 @@ Fetch1::evaluate()
      *  fetch which will signal activity when it returns/needs stepping
      *  between queues */
 
+    /* We need to update the LVPT table from the execute stage results.
+    *  DO IT HEREERERERER!!!!!! */
+
+
 
     /* This looks hackish.  And it is, but there doesn't seem to be a better
      * way to do this.  The signal from commit to suspend fetch takes 1

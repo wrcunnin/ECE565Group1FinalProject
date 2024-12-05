@@ -126,6 +126,9 @@ class BranchData /* : public ReportIF, public BubbleIF */
     /** Instruction which caused this branch */
     MyMinorDynInstPtr inst = MyMinorDynInst::bubble();
 
+    /** Output of LVPT for PC */
+    lvptData lvptIn;
+
   public:
     BranchData() {}
 
