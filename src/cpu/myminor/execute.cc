@@ -97,10 +97,7 @@ Execute::Execute(const std::string &name_,
             ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
     issuePriority(0),
-    commitPriority(0),
-    cvu(params.tableSize,
-        params.threshold,
-        params.maxValue)
+    commitPriority(0)
 {
     if (commitLimit < 1) {
         fatal("%s: executeCommitLimit must be >= 1 (%d)\n", name_,
@@ -338,7 +335,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
     ExecContext context(cpu, *cpu.threads[thread_id], *this, inst);
 
-    PacketPtr packet = response ? response->packet : NULL;
+    PacketPtr packet = response->packet;
 
     bool is_load = inst->staticInst->isLoad();
     bool is_store = inst->staticInst->isStore();
@@ -366,13 +363,13 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
             fault->invoke(thread, inst->staticInst);
         }
-    } else if (!is_constant && !packet) {
+    } else if (!packet) {
         DPRINTF(MyMinorMem, "Completing failed request inst: %s\n",
             *inst);
         use_context_predicate = false;
         if (!context.readMemAccPredicate())
             inst->staticInst->completeAcc(nullptr, &context, inst->traceData);
-    } else if (!is_constant && packet->isError()) {
+    } else if (packet->isError()) {
         DPRINTF(MyMinorMem, "Trying to commit error response: %s\n",
             *inst);
 
@@ -390,7 +387,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         }
 
         /* Complete the memory access instruction */
-        fault = is_load && is_constant ? NoFault : inst->staticInst->completeAcc(packet, &context,
+        fault = inst->staticInst->completeAcc(packet, &context,
             inst->traceData);
 
         uint8_t* packetdataptr = packet->data; //maybe??? I think???
@@ -408,15 +405,13 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             // Increase counter in LVPT
             change_counter = 1;
             // If threshhold is now at constant value
-                CVU::AddEntryToCVU(*packetdataptr, lvpt_index, translated_data_addr);
+                cvu.AddEntryToCVU(*packetdataptr, lvpt_index, response->getAddr());
                 // Add to CVU
         // else (MEM Data != prediction)
         } else {
             change_counter = 2;
         }
             // decrease counter in LVPT
-
-
         if (fault != NoFault) {
             /* Invoke fault created by instruction completion */
             DPRINTF(MyMinorMem, "Fault in memory completeAcc: %s\n",
@@ -425,9 +420,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         } else {
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
-            
-            if (!(is_load && is_constant) && response && response->needsToBeSentToStoreBuffer())
-                cvu.storeInvalidate(packet->getAddr()); //get the virtual address here!!
+            if (response->needsToBeSentToStoreBuffer())
                 lsq.sendStoreToStoreBuffer(response);
         }
     } else {
@@ -437,8 +430,8 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
 
     /* Do not pop response if inst is a load and is a constant.
     *  Instruction will NOT be in the queue */
-    if (!(is_load && is_constant))
-        lsq.popResponse(response);
+    //if (!(is_load && is_constant))
+    lsq.popResponse(response);
 
     if (inst->traceData) {
         inst->traceData->setPredicate((use_context_predicate ?
@@ -494,10 +487,6 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
     /* Set to true if the mem op is issued and sent to the mem system */
     passed_predicate = false;
 
-    if(inst->staticinst->isLoad() && inst->lvptOut.constant) {
-        thread->pcState(*old_pc); // not sure if needed???
-        issued = true;
-    } else {
         if (!lsq.canRequest()) {
             /* Not acting on instruction yet as the memory
             * queues are full */
@@ -557,7 +546,6 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
             /* Restore thread PC */
             thread->pcState(*old_pc);
             issued = true;
-        }
     }
 
     return issued;
@@ -621,10 +609,6 @@ Execute::issue(ThreadID thread_id)
         Fault fault = inst->fault;
         bool discarded = false;
         bool issued_mem_ref = false;
-        /* Check if instruction is load, is constant, and is in CVU */
-        bool is_in_CVU =
-            inst->staticInsts->is_load() && inst->lvptOut.constant &&
-            cvu.verifyEntryInCVU(inst->lvptOut.address, inst->lvptOut.index);
 
         if (inst->isBubble()) {
             /* Skip */
@@ -1172,10 +1156,6 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         LSQ::LSQRequestPtr mem_response =
             (inst->inLSQ ? lsq.findResponse(inst) : NULL);
 
-        //If constant and load then set mem_reponse to be that value
-        bool constant_mem_response =
-            inst->staticInst->isLoad() && inst->lvptOut.constant && cvu.verifyEntryInCVU(inst->lvptOut.address, inst->lvptOut.index, inst->lvptOut.iconstant);
-
         DPRINTF(MyMinorExecute, "Trying to commit canCommitInsts: %d\n",
             can_commit_insts);
 
@@ -1392,12 +1372,9 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
         }
 
         /* Mark the mem inst as being in the LSQ */
-        if (issued_mem_ref && (!inst->staticinst->isLoad() && !constant)) {
+        if (issued_mem_ref) {
             inst->fuIndex = 0;
             inst->inLSQ = true;
-        } else{
-            inst->fuIndex = 0;
-            inst->inLSQ = false;
         }
 
         /* Pop issued (to LSQ) and discarded mem refs from the inFUMemInsts
