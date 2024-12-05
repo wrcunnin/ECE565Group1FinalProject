@@ -1,6 +1,8 @@
 #include "cpu/myminor/CVU.hh"
 
 #include <functional>
+#include <stdlib>
+#include <ctime>
 
 #include "cpu/myminor/cpu.hh"
 #include "cpu/myminor/exec_context.hh"
@@ -39,8 +41,30 @@ CVU::storeInvalidate(unsigned int address)
     tableEntry entry = cvuTable[hitIndex];
     if(entry.addr == address){
         entry.valid = false;
+        CVU::AddToInvalidateList(hitIndex);
     }
   }
+}
+
+CVU::AddToInvalidateList(unsigned int TableIndex){
+  InvalidEntries.push_back(TableIndex);
+}
+
+CVU::AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Translated_Data_Address){
+
+  tableEntry newEntry = {true, Translated_Data_Address, LVPT_Index, data};
+  unsigned int new_entry_index;
+
+  if(InvalidEntries.empty){ // If there are no invalid entries
+    // Pick random entry to remove from the CVU and fill slot with new data
+    std::srand(std::time(0));
+    new_entry_index = std::rand() % (tableSize + 1);
+  } else { //If invalid entries then pick first one 
+    new_entry_index = InvalidEntries.front();
+    InvalidEntries.pop_front();
+  }
+
+  cvuTable[new_entry_index] = newEntry
 }
 
 bool
