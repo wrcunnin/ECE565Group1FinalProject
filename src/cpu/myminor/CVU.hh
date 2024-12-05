@@ -2,6 +2,7 @@
 #define __CPU_MYMINOR_CVU_HH__
 
 #include <vector>
+#include <list> 
 
 #include "arch/generic/mmu.hh"
 #include "base/named.hh"
@@ -9,6 +10,7 @@
 #include "cpu/myminor/buffers.hh"
 #include "cpu/myminor/cpu.hh"
 #include "cpu/myminor/pipe_data.hh"
+
 
 namespace gem5
 {
@@ -24,6 +26,8 @@ protected:
     unsigned int tableSize;
     unsigned int threshold;
     unsigned int maxValue;
+    std::list<unsigned int> InvalidEntries;
+
 
     struct tableEntry
     {
