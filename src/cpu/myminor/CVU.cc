@@ -32,6 +32,7 @@ CVU::CVU(unsigned int cvu_table_size,
   tableSize(cvu_table_size),
   threshold(lct_threshold),
   maxValue(lct_maxvalue),
+  InvalidEntries(),
   cvuTable()
 {
   cvuTable.resize(cvu_table_size);
@@ -60,7 +61,7 @@ CVU::AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Tran
   tableEntry newEntry = {true, Translated_Data_Address, LVPT_Index, data};
   unsigned int new_entry_index;
 
-  if(InvalidEntries.empty){ // If there are no invalid entries
+  if(InvalidEntries.empty()){ // If there are no invalid entries
     // Pick random entry to remove from the CVU and fill slot with new data
     std::srand(std::time(0));
     new_entry_index = std::rand() % (tableSize + 1);
@@ -69,7 +70,7 @@ CVU::AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Tran
     InvalidEntries.pop_front();
   }
 
-  cvuTable[new_entry_index] = newEntry
+  cvuTable[new_entry_index] = newEntry;
 }
 
 bool

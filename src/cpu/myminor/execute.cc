@@ -97,7 +97,8 @@ Execute::Execute(const std::string &name_,
             ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
     issuePriority(0),
-    commitPriority(0)
+    commitPriority(0),
+    thresholdLCT(params.thresholdLCT)
 {
     if (commitLimit < 1) {
         fatal("%s: executeCommitLimit must be >= 1 (%d)\n", name_,
@@ -395,21 +396,24 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         // 0 no change to counter
         // 1 increase counter 
         // 2 Decrease counter
-        change_counter = 0;
+        unsigned int change_counter = 0;
         // LVPT pc to update
-        access_pc = passed_lvpt_pc;
+        // access_pc = passed_lvpt_pc;
 
-
-        // If MEM Data == prediction
-        if (*packetdataptr == prediction){ //change prediciton to something real
-            // Increase counter in LVPT
-            change_counter = 1;
-            // If threshhold is now at constant value
-                lsq.cvu.AddEntryToCVU(*packetdataptr, lvpt_index, response->getAddr());
-                // Add to CVU
-        // else (MEM Data != prediction)
-        } else {
-            change_counter = 2;
+        // If the LVPT told us to predict
+        if (inst->lvptOutPredict) {
+            // If MEM Data == prediction
+            if (*packetdataptr == inst->lvptOutValue){ //change prediciton to something real
+                // Increase counter in LVPT
+                change_counter = 1;
+                // If threshhold is now at constant value, add to CVU
+                if (inst->lvptOutCounter == thresholdLCT - 1) {
+                    lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
+                }
+            // else (MEM Data != prediction)
+            } else {
+                change_counter = 2;
+            }
         }
             // decrease counter in LVPT
         if (fault != NoFault) {
@@ -421,16 +425,16 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
             if (response->needsToBeSentToStoreBuffer()) {
-                lsq.cvu.storeInvalidate(response->getAddr()); //get the virtual address here!!
+                lsq.cvu.storeInvalidate(packet->getAddr()); //get the virtual address here!!
                 lsq.sendStoreToStoreBuffer(response);
             }
             
             /* update outputs to LVPT */
-            out.lvptInPC = inst->pc->instAddr();
-            out.lvptInAddr = (unsigned int) (response->getAddr());
-            out.lvptInValue = (unsigned int) (*packetdataptr);      
-            out.lvptInPredict = change_counter == 1; // this should increase the counter
-            out.lvptInConstant = change_counter == 0; // this should not change the counter
+            branch.lvptInPC = inst->pc->instAddr();
+            branch.lvptInAddr = (unsigned int) (packet->getAddr());
+            branch.lvptInValue = (unsigned int) (*packetdataptr);      
+            branch.lvptInPredict = change_counter == 1; // this should increase the counter
+            branch.lvptInConstant = change_counter == 0; // this should not change the counter
         }
     } else {
         fatal("There should only ever be reads, "

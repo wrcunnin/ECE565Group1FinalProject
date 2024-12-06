@@ -189,6 +189,7 @@ class MyMinorDynInst : public RefCounted
     unsigned int lvptOutPC;
     unsigned int lvptOutIndex;
     unsigned int lvptOutAddr;
+    unsigned int lvptOutCounter;
 
     /** Tried to predict the destination of this inst (if a control
      *  instruction or a sys call) */

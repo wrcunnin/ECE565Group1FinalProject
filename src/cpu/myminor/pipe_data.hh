@@ -222,6 +222,7 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     unsigned int lvptOutPC;
     unsigned int lvptOutIndex;
     unsigned int lvptOutAddr;
+    unsigned int lvptOutCounter;
 
   public:
     /** This line has a fault.  The bubble flag will be false and seqNums
@@ -317,6 +318,7 @@ class ForwardInstData /* : public ReportIF, public BubbleIF */
     unsigned int lvptOutPC;
     unsigned int lvptOutIndex;
     unsigned int lvptOutAddr;
+    unsigned int lvptOutCounter;
 
   public:
     explicit ForwardInstData(unsigned int width = 0,

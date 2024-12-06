@@ -76,7 +76,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
 
 void
 LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,
-           unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr)
+           unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr, unsigned int& outDataCounter)
 {
   // value table
   unsigned int numIndexBits = log2(tableSize);
@@ -99,6 +99,7 @@ LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigne
   outDataIndex   = 0;
   outDataAddr    = 0;
   outDataConstant = false;
+  outDataCounter = 0;
 
   if (entry.valid && entry.tag == tag)
   {
@@ -108,6 +109,7 @@ LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigne
     outDataPC      = pc;
     outDataIndex   = index;
     outDataAddr    = entry.addr;
+    outDataCounter = predict;
     if (predict >= threshold) {
       outDataConstant = true;
     }

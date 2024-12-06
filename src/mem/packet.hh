@@ -381,8 +381,9 @@ class Packet : public Printable
     * responder receives the packet. If not populated memory should
     * be allocated.
     */
+  public:
     PacketDataPtr data;
-
+  private:
     /// The address of the request.  This address could be virtual or
     /// physical, depending on the system configuration.
     Addr addr;

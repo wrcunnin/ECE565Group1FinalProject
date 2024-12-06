@@ -212,6 +212,8 @@ class Execute : public Named
     ThreadID issuePriority;
     ThreadID commitPriority;
 
+    unsigned int thresholdLCT;
+
   protected:
     friend std::ostream &operator <<(std::ostream &os, DrainState state);
 

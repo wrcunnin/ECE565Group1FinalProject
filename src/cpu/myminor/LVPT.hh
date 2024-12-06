@@ -53,13 +53,13 @@ public:
 public:
     LVPT(const BaseMyMinorCPUParams &params);
 
-    virtual ~LVPT();
+    // virtual ~LVPT();
 
     void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict);
 
     /** Table access here for given PC */
     void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,
-        unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr);
+        unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr, unsigned int& outDataCounter);
 
 };
 

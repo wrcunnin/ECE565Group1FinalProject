@@ -172,12 +172,13 @@ ExecuteDummy::evaluate()
 
                 /* Set lvptOut of output_inst */
                 // output_inst->lvptOut = *inp.outputWire.lvptOut;
-                output_inst->lvptOutPredict = *inp.outputWire.lvptOutPredict;
-                output_inst->lvptOutConstant = *inp.outputWire.lvptOutConstant;
-                output_inst->lvptOutValue = *inp.outputWire.lvptOutValue;
-                output_inst->lvptOutPC = *inp.outputWire.lvptOutPC;
-                output_inst->lvptOutIndex = *inp.outputWire.lvptOutIndex;
-                output_inst->lvptOutAddr = *inp.outputWire.lvptOutAddr;
+                output_inst->lvptOutPredict = inst->lvptOutPredict;
+                output_inst->lvptOutConstant = inst->lvptOutConstant;
+                output_inst->lvptOutValue = inst->lvptOutValue;
+                output_inst->lvptOutPC = inst->lvptOutPC;
+                output_inst->lvptOutIndex = inst->lvptOutIndex;
+                output_inst->lvptOutAddr = inst->lvptOutAddr;
+                output_inst->lvptOutCounter = inst->lvptOutCounter;
 
                 /* Correctly size the output before writing */
                 if (output_index == 0) insts_out.resize(outputWidth);

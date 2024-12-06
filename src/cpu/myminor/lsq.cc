@@ -1598,7 +1598,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
 
     bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
 
-    bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex);
+    bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex, inst->lvptOutConstant);
 
     if (needs_burst && inst->staticInst->isAtomic()) {
         // AMO requests that access across a cache line boundary are not
@@ -1638,7 +1638,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     /* check for value in CVU if load and constant */
     if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
         /* use predicted value for this */
-        request_data = inst->lvptOutValue;
+        std::memcpy(request_data, (void*)(&(inst->lvptOutValue)), size);;
     }
 
     if (needs_burst) {

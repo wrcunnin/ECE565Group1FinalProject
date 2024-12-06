@@ -415,6 +415,7 @@ Fetch2::evaluate()
                     dyn_inst->lvptOutPC = line_in->lvptOutPC;
                     dyn_inst->lvptOutIndex = line_in->lvptOutIndex;
                     dyn_inst->lvptOutAddr = line_in->lvptOutAddr;
+                    dyn_inst->lvptOutCounter = line_in->lvptOutCounter;
 
                     /* To complete the set, test that exec sequence number
                      *  has not been set */
@@ -554,12 +555,14 @@ Fetch2::evaluate()
         insts_out.threadId = tid;
         nextStageReserve[tid].reserve();
         // insts_out.lvptOut = *inp.outputWire.lvptOut;
-        insts_out.lvptOutPredict = *inp.outputWire.lvptOutPredict;
-        insts_out.lvptOutConstant = *inp.outputWire.lvptOutConstant;
-        insts_out.lvptOutValue = *inp.outputWire.lvptOutValue;
-        insts_out.lvptOutPC = *inp.outputWire.lvptOutPC;
-        insts_out.lvptOutIndex = *inp.outputWire.lvptOutIndex;
-        insts_out.lvptOutAddr = *inp.outputWire.lvptOutAddr;
+        // const ForwardLineData *temp_line_in = getInput(tid);
+        // insts_out.lvptOutPredict = temp_line_in->lvptOutPredict;
+        // insts_out.lvptOutConstant = temp_line_in->lvptOutConstant;
+        // insts_out.lvptOutValue = temp_line_in->lvptOutValue;
+        // insts_out.lvptOutPC = temp_line_in->lvptOutPC;
+        // insts_out.lvptOutIndex = temp_line_in->lvptOutIndex;
+        // insts_out.lvptOutAddr = temp_line_in->lvptOutAddr;
+        // insts_out.lvptOutCounter = temp_line_in->lvptOutCounter;
     }
 
     /* If we still have input to process and somewhere to put it,

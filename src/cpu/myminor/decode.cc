@@ -234,6 +234,15 @@ Decode::evaluate()
 
                 /* Set execSeqNum of output_inst */
                 output_inst->id.execSeqNum = decode_info.execSeqNum;
+
+                /* Set LVPT values to output_inst */
+                output_inst->lvptOutPredict = inst->lvptOutPredict;
+                output_inst->lvptOutConstant = inst->lvptOutConstant;
+                output_inst->lvptOutValue = inst->lvptOutValue;
+                output_inst->lvptOutPC = inst->lvptOutPC;
+                output_inst->lvptOutIndex = inst->lvptOutIndex;
+                output_inst->lvptOutAddr = inst->lvptOutAddr;
+                output_inst->lvptOutCounter = inst->lvptOutCounter;
                 /* Add tracing */
 #if TRACING_ON
                 dynInstAddTracing(output_inst, parent_static_inst, cpu);

@@ -43,17 +43,17 @@ public:
         unsigned int lct_threshold,
         unsigned int lct_maxvalue);
 
-    virtual ~CVU();
+    // virtual ~CVU();
 
     void storeInvalidate(unsigned int address);
     // Invalidate all matching addresses on a store
 
     /** Table access here for given PC */
-    void verifyEntryInCVU(unsigned int address, unsigned int index);
+    bool verifyEntryInCVU(unsigned int address, unsigned int index, bool constant);
 
     void AddToInvalidateList(unsigned int TableIndex);
-
-    bool verifyEntryInCVU(unsigned int address, unsigned int index, bool constant);
+    
+    void AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Translated_Data_Address);
 };
 }
 }
