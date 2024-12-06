@@ -48,6 +48,7 @@
 #include "debug/MyMinorCPU.hh"
 #include "debug/MyMinorTrace.hh"
 #include "debug/Quiesce.hh"
+#include "debug/LVP.hh"
 
 namespace gem5
 {
@@ -137,7 +138,8 @@ Pipeline::myminorTrace() const
 
 void
 Pipeline::evaluate()
-{
+{   
+    DPRINTF(LVP, "\n---------Starting Cycle------");
     /** We tick the CPU to update the BaseCPU cycle counters */
     cpu.tick();
 
@@ -194,6 +196,7 @@ Pipeline::evaluate()
             stop();
         }
     }
+    DPRINTF(LVP, "\n---------Ending Cycle---------");
 }
 
 MyMinorCPU::MyMinorCPUPort &

@@ -16,6 +16,7 @@
 #include "debug/MyMinorMem.hh"
 #include "debug/MyMinorTrace.hh"
 #include "debug/PCEvent.hh"
+#include "debug/LVP.hh"
 
 namespace gem5
 {
@@ -60,6 +61,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
     if (!predict)
     {
       // update LCT
+      DPRINTF(LVP, "\nDecreasing LCT value to %u ", prediction == 0 ? 0 : prediction - 1);
       predictTable[indexLCT] = prediction == 0 ? 0 : prediction - 1;
 
       // update LVPT
@@ -74,6 +76,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
     {
       // update LCT
       predictTable[indexLCT] = prediction >= maxValue ? prediction : prediction + 1;
+      DPRINTF(LVP, "\nIncreasing LCT value to %u ", prediction >= maxValue ? prediction : prediction + 1);
     }
   }
 }

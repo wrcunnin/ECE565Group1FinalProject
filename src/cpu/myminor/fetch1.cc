@@ -47,6 +47,7 @@
 #include "base/logging.hh"
 #include "base/trace.hh"
 #include "cpu/myminor/pipeline.hh"
+#include "debug/LVP.hh"
 #include "debug/Drain.hh"
 #include "debug/Fetch.hh"
 #include "debug/MyMinorTrace.hh"
@@ -555,6 +556,10 @@ Fetch1::processResponse(Fetch1::FetchRequestPtr response,
     /* Set fetch address to virtual address */
     line.fetchAddr = response->pc;
     /* Get LVPT output */
+    DPRINTF(LVP, "\nChecking lvpt table output\nFetchAddr: %d\nPredict: %d\nConstant %d\nValue: %d\nPC: %d\nlvptOutIndex: %d\nlvptOutAddr: %d\nCounter: %d", 
+    line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
+        line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr, line.lvptOutCounter);
+
     lvpt.read(line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
         line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr, line.lvptOutCounter);
     /* Set the lineBase, which is a sizeof(MachInst) aligned address <=
@@ -708,6 +713,8 @@ Fetch1::evaluate()
 
     /* We need to update the LVPT table from the execute stage results.
     *  DO IT HEREERERERER!!!!!! */
+    DPRINTF(LVP, "\nChecking lvpt table update\nValue: %d\nAddr: %d\nPC: %d\nPredict %d\nConstant %d", execute_branch.lvptInValue, execute_branch.lvptInAddr, execute_branch.lvptInPC,
+        execute_branch.lvptInPredict, execute_branch.lvptInConstant);
     lvpt.updateTable(execute_branch.lvptInValue, execute_branch.lvptInAddr, execute_branch.lvptInPC,
         execute_branch.lvptInPredict, execute_branch.lvptInConstant);
 

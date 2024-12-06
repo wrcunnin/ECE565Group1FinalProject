@@ -18,6 +18,7 @@
 #include "debug/MyMinorMem.hh"
 #include "debug/MyMinorTrace.hh"
 #include "debug/PCEvent.hh"
+#include "debug/LVP.hh"
 
 namespace gem5
 {
@@ -36,6 +37,10 @@ CVU::CVU(unsigned int cvu_table_size,
   cvuTable()
 {
   cvuTable.resize(cvu_table_size);
+
+  for (unsigned int i = 0; i < tableSize; i++) {
+    InvalidEntries.push_back(i);
+  }
 }
 
 void
@@ -45,7 +50,8 @@ CVU::storeInvalidate(unsigned int address)
     tableEntry entry = cvuTable[hitIndex];
     if(entry.addr == address){
         entry.valid = false;
-        CVU::AddToInvalidateList(hitIndex);
+        AddToInvalidateList(hitIndex);
+        DPRINTF(LVP, "Adding value to Invalidate list %u", hitIndex);
     }
   }
 }
@@ -61,16 +67,20 @@ CVU::AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Tran
   tableEntry newEntry = {true, Translated_Data_Address, LVPT_Index, data};
   unsigned int new_entry_index;
 
+  bool random = false;
+
   if(InvalidEntries.empty()){ // If there are no invalid entries
     // Pick random entry to remove from the CVU and fill slot with new data
     std::srand(std::time(0));
     new_entry_index = std::rand() % (tableSize + 1);
+    random = true;
   } else { //If invalid entries then pick first one 
     new_entry_index = InvalidEntries.front();
     InvalidEntries.pop_front();
   }
 
   cvuTable[new_entry_index] = newEntry;
+  DPRINTF(LVP, "\nAdding new entry to CVU at index: %u using random %d", new_entry_index, random);
 }
 
 bool

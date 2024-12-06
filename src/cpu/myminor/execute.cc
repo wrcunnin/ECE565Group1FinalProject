@@ -397,7 +397,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         // 0 no change to counter
         // 1 increase counter 
         // 2 Decrease counter
-        unsigned int change_counter = 0;
+        int change_counter = 0;
         // LVPT pc to update
         // access_pc = passed_lvpt_pc;
 
@@ -407,7 +407,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             if (*packetdataptr == inst->lvptOutValue){ //change prediciton to something real
                 // Increase counter in LVPT
                 change_counter = 1;
-                DPRINTF(LVP, "\nPacket match - increasing threshold for PC: %d", inst->pc->instAddr());
+                DPRINTF(LVP, "\nPacket match - increasing threshold for PC: %u", inst->pc->instAddr());
                 // If threshhold is now at constant value, add to CVU
                 if (inst->lvptOutCounter == thresholdLCT - 1) {
                     DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
@@ -415,7 +415,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
                 }
             // else (MEM Data != prediction)
             } else {
-                DPRINTF(LVP, "\nPacket mismatch - decreasing threshold for PC: %d", inst->pc->instAddr());
+                DPRINTF(LVP, "\nPacket mismatch - decreasing threshold for PC: %u", inst->pc->instAddr());
                 change_counter = 2;
             }
         }

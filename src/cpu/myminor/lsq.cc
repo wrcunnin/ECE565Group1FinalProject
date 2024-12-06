@@ -49,6 +49,7 @@
 #include "cpu/utils.hh"
 #include "debug/Activity.hh"
 #include "debug/MyMinorMem.hh"
+#include "debug/LVP.hh"
 
 namespace gem5
 {
@@ -1599,6 +1600,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
 
     bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex, inst->lvptOutConstant);
+    DPRINTF(LVP, "\nEntry in CVU: %d", entry_in_CVU);
 
     if (needs_burst && inst->staticInst->isAtomic()) {
         // AMO requests that access across a cache line boundary are not
