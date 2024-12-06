@@ -70,6 +70,7 @@ if env['CONF']['TARGET_ISA'] != 'null':
     DebugFlag('MyMinorScoreboard', 'MyMinor Execute register scoreboard')
     DebugFlag('MyMinorTrace', 'MyMinorTrace cycle-by-cycle state trace')
     DebugFlag('MyMinorTiming', 'Extra timing for instructions')
+    DebugFlag('LVP', 'Load Value Predictor Tracking')
 
     CompoundFlag('MyMinor', [
         'MyMinorCPU', 'MyMinorExecute', 'MyMinorInterrupt', 'MyMinorMem',

@@ -53,6 +53,7 @@
 #include "debug/MyMinorInterrupt.hh"
 #include "debug/MyMinorMem.hh"
 #include "debug/MyMinorTrace.hh"
+#include "debug/LVP.hh"
 #include "debug/PCEvent.hh"
 
 namespace gem5
@@ -406,12 +407,15 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             if (*packetdataptr == inst->lvptOutValue){ //change prediciton to something real
                 // Increase counter in LVPT
                 change_counter = 1;
+                DPRINTF(LVP, "\nPacket match - increasing threshold for PC: %d", inst->pc->instAddr());
                 // If threshhold is now at constant value, add to CVU
                 if (inst->lvptOutCounter == thresholdLCT - 1) {
+                    DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
                     lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
                 }
             // else (MEM Data != prediction)
             } else {
+                DPRINTF(LVP, "\nPacket mismatch - decreasing threshold for PC: %d", inst->pc->instAddr());
                 change_counter = 2;
             }
         }
@@ -1652,6 +1656,8 @@ Execute::evaluate()
     /* Make sure the input (if any left) is pushed */
     if (!inp.outputWire->isBubble())
         inputBuffer[inp.outputWire->threadId].pushTail();
+
+    //DPRINTF(LVP, "\nExecute received inst:")
 }
 
 ThreadID
