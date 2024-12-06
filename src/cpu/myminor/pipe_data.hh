@@ -310,6 +310,14 @@ class ForwardInstData /* : public ReportIF, public BubbleIF */
     /** Thread associated with these instructions */
     ThreadID threadId;
 
+    /** Output of LVPT for PC */
+    bool lvptOutPredict;
+    bool lvptOutConstant;
+    unsigned int lvptOutValue;
+    unsigned int lvptOutPC;
+    unsigned int lvptOutIndex;
+    unsigned int lvptOutAddr;
+
   public:
     explicit ForwardInstData(unsigned int width = 0,
                              ThreadID tid = InvalidThreadID);

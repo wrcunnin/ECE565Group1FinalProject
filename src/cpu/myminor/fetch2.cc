@@ -407,7 +407,14 @@ Fetch2::evaluate()
                     dyn_inst->id.predictionSeqNum = fetch_info.predictionSeqNum;
 
                     /* pass along LVPT info */
-                    dyn_inst->lvptOut = *inp.outputWire.lvptOut
+                    // dyn_inst->lvptOut = *inp.outputWire.lvptOut
+                    
+                    dyn_inst->lvptOutPredict = line_in->lvptOutPredict;
+                    dyn_inst->lvptOutConstant = line_in->lvptOutConstant;
+                    dyn_inst->lvptOutValue = line_in->lvptOutValue;
+                    dyn_inst->lvptOutPC = line_in->lvptOutPC;
+                    dyn_inst->lvptOutIndex = line_in->lvptOutIndex;
+                    dyn_inst->lvptOutAddr = line_in->lvptOutAddr;
 
                     /* To complete the set, test that exec sequence number
                      *  has not been set */
@@ -546,7 +553,13 @@ Fetch2::evaluate()
         cpu.activityRecorder->activity();
         insts_out.threadId = tid;
         nextStageReserve[tid].reserve();
-        insts_out.lvptOut = *inp.outputWire.lvptOut;
+        // insts_out.lvptOut = *inp.outputWire.lvptOut;
+        insts_out.lvptOutPredict = *inp.outputWire.lvptOutPredict;
+        insts_out.lvptOutConstant = *inp.outputWire.lvptOutConstant;
+        insts_out.lvptOutValue = *inp.outputWire.lvptOutValue;
+        insts_out.lvptOutPC = *inp.outputWire.lvptOutPC;
+        insts_out.lvptOutIndex = *inp.outputWire.lvptOutIndex;
+        insts_out.lvptOutAddr = *inp.outputWire.lvptOutAddr;
     }
 
     /* If we still have input to process and somewhere to put it,

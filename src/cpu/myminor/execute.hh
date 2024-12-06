@@ -212,8 +212,6 @@ class Execute : public Named
     ThreadID issuePriority;
     ThreadID commitPriority;
 
-    CVU cvu;
-
   protected:
     friend std::ostream &operator <<(std::ostream &os, DrainState state);
 

@@ -18,7 +18,7 @@ namespace myminor
 
 /** Execute stage.  Everything apart from fetching and decoding instructions.
  *  The LSQ lives here too. */
-class LVPT : public Named
+class LVPT
 {
 public:
     unsigned int tableSize;
@@ -55,7 +55,7 @@ public:
 
     virtual ~LVPT();
 
-    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mispredict);
+    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict);
 
     /** Table access here for given PC */
     void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,

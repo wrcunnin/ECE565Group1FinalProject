@@ -51,6 +51,9 @@ public:
     /** Table access here for given PC */
     void verifyEntryInCVU(unsigned int address, unsigned int index);
 
+    void AddToInvalidateList(unsigned int TableIndex);
+
+    bool verifyEntryInCVU(unsigned int address, unsigned int index, bool constant);
 };
 }
 }

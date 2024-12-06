@@ -49,10 +49,12 @@ CVU::storeInvalidate(unsigned int address)
   }
 }
 
+void
 CVU::AddToInvalidateList(unsigned int TableIndex){
   InvalidEntries.push_back(TableIndex);
 }
 
+void
 CVU::AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Translated_Data_Address){
 
   tableEntry newEntry = {true, Translated_Data_Address, LVPT_Index, data};

@@ -171,7 +171,13 @@ ExecuteDummy::evaluate()
                 output_inst->id.execSeqNum = executeDummy_info.execSeqNum;
 
                 /* Set lvptOut of output_inst */
-                output_inst->lvptOut = *inp.outputWire.lvptOut;
+                // output_inst->lvptOut = *inp.outputWire.lvptOut;
+                output_inst->lvptOutPredict = *inp.outputWire.lvptOutPredict;
+                output_inst->lvptOutConstant = *inp.outputWire.lvptOutConstant;
+                output_inst->lvptOutValue = *inp.outputWire.lvptOutValue;
+                output_inst->lvptOutPC = *inp.outputWire.lvptOutPC;
+                output_inst->lvptOutIndex = *inp.outputWire.lvptOutIndex;
+                output_inst->lvptOutAddr = *inp.outputWire.lvptOutAddr;
 
                 /* Correctly size the output before writing */
                 if (output_index == 0) insts_out.resize(outputWidth);

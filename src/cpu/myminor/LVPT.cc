@@ -54,7 +54,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
   unsigned int prediction = predictTable[indexLCT];
 
   // on a mispredict
-  if (~predict)
+  if (!predict)
   {
     // update LCT
     predictTable[indexLCT] = prediction == 0 ? 0 : prediction - 1;
@@ -108,7 +108,7 @@ LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigne
     outDataPC      = pc;
     outDataIndex   = index;
     outDataAddr    = entry.addr;
-    if (predict >= threshhold) {
+    if (predict >= threshold) {
       outDataConstant = true;
     }
   }
