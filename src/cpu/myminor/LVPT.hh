@@ -55,7 +55,7 @@ public:
 
     // virtual ~LVPT();
 
-    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict);
+    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict, bool constant);
 
     /** Table access here for given PC */
     void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,

@@ -162,6 +162,12 @@ for arg in args.param:
     arg = arg.split("=")
     param[arg[0]] = arg[1]
 
+if hasattr(CPUClass, "thresholdLCT") and ("system.cpu[:].thresholdLCT" in param.keys()):
+    CPUClass.thresholdLCT = int(param["system.cpu[:].thresholdLCT"])
+
+if hasattr(CPUClass, "maxValueLCT") and ("system.cpu[:].maxValueLCT" in param.keys()):
+    CPUClass.maxValueLCT = int(param["system.cpu[:].maxValueLCT"])
+
 if hasattr(CPUClass, "opLatSIMD") and ("system.cpu[:].opLatSIMD" in param.keys()):
     CPUClass.opLatSIMD = int(param["system.cpu[:].opLatSIMD"])
 

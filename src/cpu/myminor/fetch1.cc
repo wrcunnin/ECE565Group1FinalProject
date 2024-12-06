@@ -708,7 +708,8 @@ Fetch1::evaluate()
 
     /* We need to update the LVPT table from the execute stage results.
     *  DO IT HEREERERERER!!!!!! */
-
+    lvpt.updateTable(execute_branch.lvptInValue, execute_branch.lvptInAddr, execute_branch.lvptInPC,
+        execute_branch.lvptInPredict, execute_branch.lvptInConstant);
 
 
     /* This looks hackish.  And it is, but there doesn't seem to be a better
