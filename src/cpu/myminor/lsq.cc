@@ -1405,7 +1405,10 @@ LSQ::LSQ(std::string name_, std::string dcache_port_name_,
     unsigned int in_memory_system_limit, unsigned int line_width,
     unsigned int requests_queue_size, unsigned int transfers_queue_size,
     unsigned int store_buffer_size,
-    unsigned int store_buffer_cycle_store_limit) :
+    unsigned int store_buffer_cycle_store_limit,
+    unsigned int cvu_table_size,
+    unsigned int lct_threshold,
+    unsigned int lct_maxvalue) :
     Named(name_),
     cpu(cpu_),
     execute(execute_),
@@ -1423,7 +1426,8 @@ LSQ::LSQ(std::string name_, std::string dcache_port_name_,
     numStoresInTransfers(0),
     numAccessesIssuedToMemory(0),
     retryRequest(NULL),
-    cacheBlockMask(~(cpu_.cacheLineSize() - 1))
+    cacheBlockMask(~(cpu_.cacheLineSize() - 1)),
+    cvu(cvu_table_size, lct_threshold, lct_maxvalue)
 {
     if (in_memory_system_limit < 1) {
         fatal("%s: executeMaxAccessesInMemory must be >= 1 (%d)\n", name_,

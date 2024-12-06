@@ -555,7 +555,8 @@ Fetch1::processResponse(Fetch1::FetchRequestPtr response,
     /* Set fetch address to virtual address */
     line.fetchAddr = response->pc;
     /* Get LVPT output */
-    line.lvptOut = lvpt.read(line.fetchAddr);
+    lvpt.read(line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
+        line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr);
     /* Set the lineBase, which is a sizeof(MachInst) aligned address <=
      *  pc.instAddr() */
     line.lineBaseAddr = response->request->getVaddr();

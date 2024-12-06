@@ -1,7 +1,7 @@
 #include "cpu/myminor/CVU.hh"
 
 #include <functional>
-#include <stdlib>
+// #include <stdlib>
 #include <ctime>
 
 #include "cpu/myminor/cpu.hh"
@@ -26,12 +26,15 @@ GEM5_DEPRECATED_NAMESPACE(MyMinor, myminor);
 namespace myminor
 {
 
-CVU::CVU(const BaseMyMinorCPUParams &params) :
-  tableSize(params.tableSize),
-  threshold(params.thresholdLCT),
-  maxValue(params.maxValueLCT),
+CVU::CVU(unsigned int cvu_table_size,
+        unsigned int lct_threshold,
+        unsigned int lct_maxvalue) :
+  tableSize(cvu_table_size),
+  threshold(lct_threshold),
+  maxValue(lct_maxvalue),
+  cvuTable()
 {
-
+  cvuTable.resize(cvu_table_size);
 }
 
 void

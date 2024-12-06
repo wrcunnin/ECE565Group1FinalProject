@@ -237,6 +237,12 @@ class BaseMyMinorCPU(BaseCPU):
     fetch1ToFetch2BackwardDelay = Param.Cycles(1,
         "Backward cycle delay from Fetch2 to Fetch1 for branch prediction"
         " signalling (0 means in the same cycle, 1 mean the next cycle)")
+    tableSizeLVPT = Param.Unsigned(1024,
+        "Total number of LVPT entries")
+    thresholdLCT = Param.Unsigned(6,
+        "Threshold for LVPT entry to be considered a constant")
+    maxValueLCT = Param.Unsigned(7,
+        "Maximum value the LCT can count to")
 
     fetch2InputBufferSize = Param.Unsigned(2,
         "Size of input buffer to Fetch2 in cycles-worth of insts.")
@@ -312,6 +318,9 @@ class BaseMyMinorCPU(BaseCPU):
     executeAllowEarlyMemoryIssue = Param.Bool(True,
         "Allow mem refs to be issued to the LSQ before reaching the head of"
         " the in flight insts queue")
+
+    tableSizeCVU = Param.Unsigned(32,
+        "Total number of CVU entries")
 
     enableIdling = Param.Bool(True,
         "Enable cycle skipping when the processor is idle\n");

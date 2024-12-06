@@ -53,6 +53,7 @@
 #include "cpu/myminor/cpu.hh"
 #include "cpu/myminor/pipe_data.hh"
 #include "cpu/myminor/trace.hh"
+#include "cpu/myminor/CVU.hh"
 #include "mem/packet.hh"
 
 namespace gem5
@@ -622,6 +623,9 @@ class LSQ : public Named
     /** Address Mask for a cache block (e.g. ~(cache_block_size-1)) */
     Addr cacheBlockMask;
 
+  public:
+    CVU cvu;
+
   protected:
     /** Try and issue a memory access for a translated request at the
      *  head of the requests queue.  Also tries to move the request
@@ -651,7 +655,10 @@ class LSQ : public Named
         unsigned int max_accesses_in_memory_system, unsigned int line_width,
         unsigned int requests_queue_size, unsigned int transfers_queue_size,
         unsigned int store_buffer_size,
-        unsigned int store_buffer_cycle_store_limit);
+        unsigned int store_buffer_cycle_store_limit,
+        unsigned int cvu_table_size,
+        unsigned int lct_threshold,
+        unsigned int lct_maxvalue);
 
     virtual ~LSQ();
 

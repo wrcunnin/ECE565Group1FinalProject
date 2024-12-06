@@ -53,7 +53,7 @@
 #include "cpu/base.hh"
 #include "cpu/myminor/buffers.hh"
 #include "cpu/myminor/dyn_inst.hh"
-#include "cpu/myminor/LVPT.hh"
+// #include "cpu/myminor/LVPT.hh"
 
 namespace gem5
 {
@@ -126,8 +126,13 @@ class BranchData /* : public ReportIF, public BubbleIF */
     /** Instruction which caused this branch */
     MyMinorDynInstPtr inst = MyMinorDynInst::bubble();
 
-    /** Output of LVPT for PC */
-    lvptData lvptIn;
+    /** Input to LVPT from execute */
+    bool lvptInPredict;
+    bool lvptInConstant;
+    unsigned int lvptInValue;
+    unsigned int lvptInPC;
+    unsigned int lvptInIndex;
+    unsigned int lvptInAddr;
 
   public:
     BranchData() {}
@@ -211,7 +216,12 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     unsigned int lineWidth = 0;
 
     /** Output of LVPT for PC */
-    lvptData lvptOut;
+    bool lvptOutPredict;
+    bool lvptOutConstant;
+    unsigned int lvptOutValue;
+    unsigned int lvptOutPC;
+    unsigned int lvptOutIndex;
+    unsigned int lvptOutAddr;
 
   public:
     /** This line has a fault.  The bubble flag will be false and seqNums

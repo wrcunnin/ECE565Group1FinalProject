@@ -90,9 +90,9 @@ Execute::Execute(const std::string &name_,
         params.executeLSQTransfersQueueSize,
         params.executeLSQStoreBufferSize,
         params.executeLSQMaxStoreBufferStoresPerCycle,
-        params.tableSize,
-        params.threshold,
-        params.maxValue),
+        params.tableSizeCVU,
+        params.thresholdLCT,
+        params.maxValueLCT),
     executeInfo(params.numThreads,
             ExecuteThreadInfo(params.executeCommitLimit)),
     interruptPriority(0),
@@ -341,7 +341,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
     bool is_store = inst->staticInst->isStore();
     bool is_atomic = inst->staticInst->isAtomic();
     bool is_prefetch = inst->staticInst->isDataPrefetch();
-    bool is_constant = inst->lvptOut.constant;
+    bool is_constant = inst->lvptOutConstant;
 
     /* If true, the trace's predicate value will be taken from the exec
      *  context predicate, otherwise, it will be set to false */
@@ -380,7 +380,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         DPRINTF(MyMinorMem, "Memory response inst: %s addr: 0x%x size: %d\n",
             *inst, packet->getAddr(), packet->getSize());
         if (is_load && is_constant) {
-            DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n", inst->lvptOut.value);
+            DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n", inst->lvptOutValue);
         } else if (is_load && packet->getSize() > 0) {
             DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n",
                 static_cast<unsigned int>(packet->getConstPtr<uint8_t>()[0]));
@@ -426,11 +426,11 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             }
             
             /* update outputs to LVPT */
-            out.lvptIn.pc = inst->pc->instAddr();
-            out.lvptIn.addr = (unsigned int) (response->getAddr());
-            out.lvptIn.value = (unsigned int) (*packetdataptr);      
-            out.lvptIn.predict = change_counter == 1; // this should increase the counter
-            out.lvptIn.constant = change_counter == 0; // this should not change the counter
+            out.lvptInPC = inst->pc->instAddr();
+            out.lvptInAddr = (unsigned int) (response->getAddr());
+            out.lvptInValue = (unsigned int) (*packetdataptr);      
+            out.lvptInPredict = change_counter == 1; // this should increase the counter
+            out.lvptInConstant = change_counter == 0; // this should not change the counter
         }
     } else {
         fatal("There should only ever be reads, "

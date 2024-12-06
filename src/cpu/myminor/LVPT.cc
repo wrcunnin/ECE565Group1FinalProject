@@ -25,12 +25,18 @@ namespace myminor
 {
 
 LVPT::LVPT(const BaseMyMinorCPUParams &params) :
-  tableSize(params.tableSize),
+  tableSize(params.tableSizeLVPT),
   threshold(params.thresholdLCT),
-  maxValue(params.maxValueLCT)
+  maxValue(params.maxValueLCT),
+  valueTable(),
+  predictTable()
 {
   if (threshold > maxValue)
     fatal("LVPT: thresholdLCT (%d) must be <= maxValueLCT (%d)", threshold, maxValue);
+
+  valueTable.resize(tableSize);
+  predictTable.resize(tableSize / 4);
+  
 }
 
 void
@@ -45,13 +51,13 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
   unsigned int tag = (pc) & ~indexMask;
 
   tableEntry entry = valueTable[index];
-  unsigned int predict = predictTable[indexLCT];
+  unsigned int prediction = predictTable[indexLCT];
 
   // on a mispredict
   if (~predict)
   {
     // update LCT
-    predictTable[indexLCT] = predict == 0 ? 0 : predict - 1;
+    predictTable[indexLCT] = prediction == 0 ? 0 : prediction - 1;
 
     // update LVPT
     entry.valid = true;
@@ -64,12 +70,13 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
   else
   {
     // update LCT
-    predictTable[indexLCT] = predict >= maxValue ? predict : predict + 1;
+    predictTable[indexLCT] = prediction >= maxValue ? prediction : prediction + 1;
   }
 }
 
-lvptData
-LVPT::read(unsigned int pc)
+void
+LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,
+           unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr)
 {
   // value table
   unsigned int numIndexBits = log2(tableSize);
@@ -83,22 +90,28 @@ LVPT::read(unsigned int pc)
   unsigned int predict = predictTable[indexLCT];
 
   // check if valid and right PC
-  lvptData outData = {0};
+  // lvptData outData = {0};
   // if entry in table is valid and matches
+  // if prediction is above the threshold
+  outDataPredict = false;
+  outDataValue   = 0;
+  outDataPC      = 0;
+  outDataIndex   = 0;
+  outDataAddr    = 0;
+  outDataConstant = false;
+
   if (entry.valid && entry.tag == tag)
   {
     // if prediction is above the threshold
-    outData.predict = true;
-    outData.value   = entry.value;
-    outData.pc      = pc;
-    outData.index   = index;
-    outData.addr    = entry.addr;
+    outDataPredict = true;
+    outDataValue   = entry.value;
+    outDataPC      = pc;
+    outDataIndex   = index;
+    outDataAddr    = entry.addr;
     if (predict >= threshhold) {
-      outData.constant = true;
+      outDataConstant = true;
     }
   }
-
-  return outData;
 }
 
 }

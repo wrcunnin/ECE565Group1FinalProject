@@ -6,9 +6,7 @@
 #include "arch/generic/mmu.hh"
 #include "base/named.hh"
 #include "cpu/base.hh"
-#include "cpu/myminor/buffers.hh"
-#include "cpu/myminor/cpu.hh"
-#include "cpu/myminor/pipe_data.hh"
+#include "params/BaseMyMinorCPU.hh"
 
 
 namespace gem5
@@ -22,8 +20,7 @@ namespace myminor
  *  The LSQ lives here too. */
 class LVPT : public Named
 {
-
-protected:
+public:
     unsigned int tableSize;
     unsigned int threshold;
     unsigned int maxValue;
@@ -36,6 +33,7 @@ protected:
         unsigned int value;
     };
 
+public:
     struct lvptData
     {
         bool constant;
@@ -46,16 +44,24 @@ protected:
         unsigned int index;
     };
 
-    std::vector<tableEntry> valueTable (tableSize, 0);
+    // std::vector<tableEntry> valueTable (tableSize, 0);
+    std::vector<tableEntry> valueTable;
 
-    std::vector<unsigned int> predictTable (tableSize / 4, 0);
+    // std::vector<unsigned int> predictTable (tableSize / 4, 0);
+    std::vector<unsigned int> predictTable;
 
-    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mispredict)
+public:
+    LVPT(const BaseMyMinorCPUParams &params);
+
+    virtual ~LVPT();
+
+    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool mispredict);
 
     /** Table access here for given PC */
-    lvptData read(unsigned int pc);
+    void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,
+        unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr);
 
-}
+};
 
 }
 }

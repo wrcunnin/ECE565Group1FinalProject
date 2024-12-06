@@ -19,10 +19,9 @@ GEM5_DEPRECATED_NAMESPACE(MyMinor, myminor);
 namespace myminor
 {
 
-class CVU : public Named
+class CVU
 {
-
-protected:
+public:
     unsigned int tableSize;
     unsigned int threshold;
     unsigned int maxValue;
@@ -35,9 +34,16 @@ protected:
         unsigned int addr;
         unsigned int index;
         unsigned int data;
-    }
+    };
 
-    std::vector<tableEntry> cvuTable (tableSize, 0);
+    // std::vector<tableEntry> cvuTable (tableSize, 0);
+    std::vector<tableEntry> cvuTable;
+
+    CVU(unsigned int cvu_table_size,
+        unsigned int lct_threshold,
+        unsigned int lct_maxvalue);
+
+    virtual ~CVU();
 
     void storeInvalidate(unsigned int address);
     // Invalidate all matching addresses on a store
@@ -45,7 +51,7 @@ protected:
     /** Table access here for given PC */
     void verifyEntryInCVU(unsigned int address, unsigned int index);
 
-}
+};
 }
 }
 
