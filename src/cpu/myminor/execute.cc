@@ -438,7 +438,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             branch.lvptInAddr = (unsigned int) (packet->getAddr());
             branch.lvptInValue = (unsigned int) (*packetdataptr);      
             branch.lvptInPredict = change_counter == 1; // this should increase the counter
-            branch.lvptInConstant = change_counter == 0; // this should not change the counter
+            branch.lvptInConstant = change_counter != 0; // this change the counter if change_counter != 0
         }
     } else {
         fatal("There should only ever be reads, "

@@ -55,7 +55,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
   unsigned int prediction = predictTable[indexLCT];
 
   // if the predict counter should change
-  if (!constant)
+  if (constant)
   {
     // on a mispredict
     if (!predict)
