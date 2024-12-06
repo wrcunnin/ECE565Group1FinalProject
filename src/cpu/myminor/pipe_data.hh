@@ -129,7 +129,7 @@ class BranchData /* : public ReportIF, public BubbleIF */
     /** Input to LVPT from execute */
     bool lvptInPredict;
     bool lvptInConstant;
-    unsigned int lvptInValue;
+    unsigned long lvptInValue;
     unsigned int lvptInPC;
     unsigned int lvptInIndex;
     unsigned int lvptInAddr;
@@ -218,7 +218,7 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     /** Output of LVPT for PC */
     bool lvptOutPredict;
     bool lvptOutConstant;
-    unsigned int lvptOutValue;
+    unsigned long lvptOutValue;
     unsigned int lvptOutPC;
     unsigned int lvptOutIndex;
     unsigned int lvptOutAddr;
@@ -314,7 +314,7 @@ class ForwardInstData /* : public ReportIF, public BubbleIF */
     /** Output of LVPT for PC */
     bool lvptOutPredict;
     bool lvptOutConstant;
-    unsigned int lvptOutValue;
+    unsigned long lvptOutValue;
     unsigned int lvptOutPC;
     unsigned int lvptOutIndex;
     unsigned int lvptOutAddr;

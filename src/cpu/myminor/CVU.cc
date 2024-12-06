@@ -62,7 +62,7 @@ CVU::AddToInvalidateList(unsigned int TableIndex){
 }
 
 void
-CVU::AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Translated_Data_Address){
+CVU::AddEntryToCVU(unsigned long data, unsigned int LVPT_Index, unsigned int Translated_Data_Address){
 
   tableEntry newEntry = {true, Translated_Data_Address, LVPT_Index, data};
   unsigned int new_entry_index;

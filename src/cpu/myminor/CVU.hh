@@ -33,7 +33,7 @@ public:
         bool         valid;
         unsigned int addr;
         unsigned int index;
-        unsigned int data;
+        unsigned long data;
     };
 
     // std::vector<tableEntry> cvuTable (tableSize, 0);
@@ -53,7 +53,7 @@ public:
 
     void AddToInvalidateList(unsigned int TableIndex);
     
-    void AddEntryToCVU(unsigned int data, unsigned int LVPT_Index, unsigned int Translated_Data_Address);
+    void AddEntryToCVU(unsigned long data, unsigned int LVPT_Index, unsigned int Translated_Data_Address);
 };
 }
 }

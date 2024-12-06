@@ -41,7 +41,7 @@ LVPT::LVPT(const BaseMyMinorCPUParams &params) :
 }
 
 void
-LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict, bool constant)
+LVPT::updateTable(unsigned long data, unsigned int addr, unsigned int pc, bool predict, bool constant)
 {
   // value table
   unsigned int numIndexBits = log2(tableSize);
@@ -82,7 +82,7 @@ LVPT::updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool pr
 }
 
 void
-LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,
+LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned long& outDataValue,
            unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr, unsigned int& outDataCounter)
 {
   // value table

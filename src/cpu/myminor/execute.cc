@@ -392,7 +392,8 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         fault = inst->staticInst->completeAcc(packet, &context,
             inst->traceData);
 
-        uint8_t* packetdataptr = packet->data; //maybe??? I think???
+        // uint8_t* packetdataptr = packet->data; //maybe??? I think???
+        unsigned long packetdata = (unsigned long) (*((unsigned long *)(packet->data)));
         //Counter defintions
         // 0 no change to counter
         // 1 increase counter 
@@ -404,14 +405,17 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         // If the LVPT told us to predict
         if (inst->lvptOutPredict) {
             // If MEM Data == prediction
-            if (*packetdataptr == inst->lvptOutValue){ //change prediciton to something real
+            // if (*packetdataptr == inst->lvptOutValue){ //change prediciton to something real
+            if (packetdata == inst->lvptOutValue){ //change prediciton to something real
                 // Increase counter in LVPT
                 change_counter = 1;
                 DPRINTF(LVP, "\nPacket match - increasing threshold for PC: %u", inst->pc->instAddr());
                 // If threshhold is now at constant value, add to CVU
                 if (inst->lvptOutCounter == thresholdLCT - 1) {
-                    DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
-                    lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
+                    // DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
+                    // lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
+                    DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, packetdata, inst->lvptOutIndex, packet->getAddr());
+                    lsq.cvu.AddEntryToCVU(packetdata, inst->lvptOutIndex, packet->getAddr());
                 }
             // else (MEM Data != prediction)
             } else {
@@ -436,7 +440,8 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             /* update outputs to LVPT */
             branch.lvptInPC = inst->pc->instAddr();
             branch.lvptInAddr = (unsigned int) (packet->getAddr());
-            branch.lvptInValue = (unsigned int) (*packetdataptr);      
+            // branch.lvptInValue = (unsigned long) (*((unsigned long *)(packetdataptr)));      
+            branch.lvptInValue = packetdata;      
             branch.lvptInPredict = change_counter == 1; // this should increase the counter
             branch.lvptInConstant = change_counter != 0; // this change the counter if change_counter != 0
         }

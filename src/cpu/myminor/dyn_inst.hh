@@ -185,7 +185,7 @@ class MyMinorDynInst : public RefCounted
     /** For LVPT information */
     bool lvptOutPredict;
     bool lvptOutConstant;
-    unsigned int lvptOutValue;
+    unsigned long lvptOutValue;
     unsigned int lvptOutPC;
     unsigned int lvptOutIndex;
     unsigned int lvptOutAddr;

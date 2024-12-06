@@ -30,7 +30,7 @@ public:
         bool         valid;
         unsigned int tag;
         unsigned int addr;
-        unsigned int value;
+        unsigned long value;
     };
 
 public:
@@ -38,7 +38,7 @@ public:
     {
         bool constant;
         bool predict;
-        unsigned int value;
+        unsigned long value;
         unsigned int pc;
         unsigned int addr;
         unsigned int index;
@@ -55,10 +55,10 @@ public:
 
     // virtual ~LVPT();
 
-    void updateTable(unsigned int data, unsigned int addr, unsigned int pc, bool predict, bool constant);
+    void updateTable(unsigned long data, unsigned int addr, unsigned int pc, bool predict, bool constant);
 
     /** Table access here for given PC */
-    void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned int& outDataValue,
+    void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned long& outDataValue,
         unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr, unsigned int& outDataCounter);
 
 };
