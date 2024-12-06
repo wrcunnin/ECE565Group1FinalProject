@@ -332,6 +332,7 @@ void
 Execute::handleMemResponse(MyMinorDynInstPtr inst,
     LSQ::LSQRequestPtr response, BranchData &branch, Fault &fault)
 {
+    DPRINTF(LVP, "\n--------HANDLING MEM RESPONSE-----------");
     ThreadID thread_id = inst->id.threadId;
     ThreadContext *thread = cpu.getContext(thread_id);
 
@@ -415,7 +416,9 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
                     // DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
                     // lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
                     DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, packetdata, inst->lvptOutIndex, packet->getAddr());
+                    lsq.cvu.printCVUEntries();
                     lsq.cvu.AddEntryToCVU(packetdata, inst->lvptOutIndex, packet->getAddr());
+                    lsq.cvu.printCVUEntries();
                 }
             // else (MEM Data != prediction)
             } else {

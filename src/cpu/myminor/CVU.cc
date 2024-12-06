@@ -50,8 +50,10 @@ CVU::storeInvalidate(unsigned int address)
     tableEntry entry = cvuTable[hitIndex];
     if(entry.addr == address){
         entry.valid = false;
+        cvuTable[hitIndex].valid = false; // I am so stupid!!!
+        printCVUEntries();
         AddToInvalidateList(hitIndex);
-        DPRINTF(LVP, "Adding value to Invalidate list %u", hitIndex);
+        DPRINTF(LVP, "Adding value to Invalidate list %u\t addr: %u", hitIndex, address);
     }
   }
 }
@@ -80,7 +82,7 @@ CVU::AddEntryToCVU(unsigned long data, unsigned int LVPT_Index, unsigned int Tra
   }
 
   cvuTable[new_entry_index] = newEntry;
-  DPRINTF(LVP, "\nAdding new entry to CVU at index: %u using random %d", new_entry_index, random);
+  DPRINTF(LVP, "\nAdding new entry to CVU at index: %u using random %d, InvalidEntries Size: %d", new_entry_index, random, InvalidEntries.size());
 }
 
 bool
@@ -100,6 +102,16 @@ CVU::verifyEntryInCVU(unsigned int address, unsigned int index, bool constant)
   }
 
   return hitIndex < tableSize;
+}
+
+void
+CVU::printCVUEntries(){
+  unsigned int hitIndex = tableSize;
+
+  for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
+    tableEntry entry = cvuTable[hitIndex];
+    DPRINTF(LVP, "\nIndex: %u\tvalid: %d\taddr: %u\tindex: %u\tdata: %lu ", hitIndex, entry.valid, entry.addr, entry.index, entry.data);
+  }
 }
 
 }

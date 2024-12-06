@@ -54,6 +54,8 @@ public:
     void AddToInvalidateList(unsigned int TableIndex);
     
     void AddEntryToCVU(unsigned long data, unsigned int LVPT_Index, unsigned int Translated_Data_Address);
+
+    void printCVUEntries();
 };
 }
 }

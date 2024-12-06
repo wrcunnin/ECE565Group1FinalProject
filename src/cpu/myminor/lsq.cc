@@ -1640,7 +1640,9 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     /* check for value in CVU if load and constant */
     if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
         /* use predicted value for this */
-        std::memcpy(request_data, (void*)(&(inst->lvptOutValue)), size);;
+        std::memcpy(request_data, (void*)(&(inst->lvptOutValue)), size);
+        DPRINTF(LVP, "\nUSING CVU VALUE: %lu", *request_data);
+
     }
 
     if (needs_burst) {
