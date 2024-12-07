@@ -41,6 +41,7 @@
 #include "base/trace.hh"
 #include "cpu/myminor/pipeline.hh"
 #include "debug/Decode.hh"
+#include "debug/LVP.hh"
 
 namespace gem5
 {
@@ -243,6 +244,10 @@ Decode::evaluate()
                 output_inst->lvptOutIndex = inst->lvptOutIndex;
                 output_inst->lvptOutAddr = inst->lvptOutAddr;
                 output_inst->lvptOutCounter = inst->lvptOutCounter;
+                if (inst->staticInst->isLoad()) {
+                    DPRINTF(LVP, "\nChecking lvpt table output in Decode\nPredict: %d\nConstant %d\nValue: 0x%x\nPC: 0x%x\nlvptOutIndex: %d\nlvptOutAddr: 0x%x\nCounter: %d\n", 
+                        output_inst->lvptOutPredict, output_inst->lvptOutConstant, output_inst->lvptOutValue, output_inst->lvptOutPC, output_inst->lvptOutIndex, output_inst->lvptOutAddr, output_inst->lvptOutCounter);
+                }
                 /* Add tracing */
 #if TRACING_ON
                 dynInstAddTracing(output_inst, parent_static_inst, cpu);

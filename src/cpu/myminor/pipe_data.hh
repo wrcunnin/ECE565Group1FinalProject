@@ -130,10 +130,10 @@ class BranchData /* : public ReportIF, public BubbleIF */
     bool lvptInPredict;
     bool lvptInConstant;
     unsigned long lvptInValue;
-    unsigned int lvptInPC;
-    unsigned int lvptInIndex;
-    unsigned int lvptInAddr;
-
+    unsigned long lvptInPC;
+    unsigned long lvptInIndex;
+    unsigned long lvptInAddr;
+    
   public:
     BranchData() {}
 
@@ -152,7 +152,10 @@ class BranchData /* : public ReportIF, public BubbleIF */
         reason(other.reason), threadId(other.threadId),
         newStreamSeqNum(other.newStreamSeqNum),
         newPredictionSeqNum(other.newPredictionSeqNum),
-        inst(other.inst)
+        inst(other.inst), lvptInPredict(other.lvptInPredict),
+        lvptInConstant(other.lvptInConstant), lvptInValue(other.lvptInValue),
+        lvptInPC(other.lvptInPC), lvptInIndex(other.lvptInIndex),
+        lvptInAddr(other.lvptInAddr)
     {
         set(target, other.target);
     }
@@ -165,6 +168,12 @@ class BranchData /* : public ReportIF, public BubbleIF */
         newPredictionSeqNum = other.newPredictionSeqNum;
         set(target, other.target);
         inst = other.inst;
+        lvptInPredict = other.lvptInPredict;
+        lvptInConstant = other.lvptInConstant;
+        lvptInValue = other.lvptInValue;
+        lvptInPC = other.lvptInPC;
+        lvptInIndex = other.lvptInIndex;
+        lvptInAddr = other.lvptInAddr;
         return *this;
     }
 
@@ -219,10 +228,19 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     bool lvptOutPredict;
     bool lvptOutConstant;
     unsigned long lvptOutValue;
-    unsigned int lvptOutPC;
-    unsigned int lvptOutIndex;
-    unsigned int lvptOutAddr;
+    unsigned long lvptOutPC;
+    unsigned long lvptOutIndex;
+    unsigned long lvptOutAddr;
     unsigned int lvptOutCounter;
+    // bool lvptOutPredict = 0;
+    // bool lvptOutConstant = 0;
+    // unsigned long lvptOutValue = 0;
+    // unsigned long lvptOutPC = 0;
+    // unsigned long lvptOutIndex = 0;
+    // unsigned long lvptOutAddr = 0;
+    // unsigned int lvptOutCounter = 0;
+
+    
 
   public:
     /** This line has a fault.  The bubble flag will be false and seqNums
@@ -244,7 +262,11 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
     ForwardLineData(const ForwardLineData &other) :
         bubbleFlag(other.bubbleFlag), lineBaseAddr(other.lineBaseAddr),
         pc(other.pc->clone()), fetchAddr(other.fetchAddr),
-        lineWidth(other.lineWidth), fault(other.fault), id(other.id),
+        lineWidth(other.lineWidth), lvptOutPredict(other.lvptOutPredict),
+        lvptOutConstant(other.lvptOutConstant), lvptOutValue(other.lvptOutValue),
+        lvptOutPC(other.lvptOutPC), lvptOutIndex(other.lvptOutIndex),
+        lvptOutAddr(other.lvptOutAddr), lvptOutCounter(other.lvptOutCounter),
+        fault(other.fault), id(other.id),
         line(other.line), packet(other.packet)
     {}
     ForwardLineData &
@@ -255,6 +277,13 @@ class ForwardLineData /* : public ReportIF, public BubbleIF */
         set(pc, other.pc);
         fetchAddr = other.fetchAddr;
         lineWidth = other.lineWidth;
+        lvptOutPredict = other.lvptOutPredict;
+        lvptOutConstant = other.lvptOutConstant;
+        lvptOutValue = other.lvptOutValue;
+        lvptOutPC = other.lvptOutPC;
+        lvptOutIndex = other.lvptOutIndex;
+        lvptOutAddr = other.lvptOutAddr;
+        lvptOutCounter = other.lvptOutCounter;
         fault = other.fault;
         id = other.id;
         line = other.line;
@@ -312,13 +341,13 @@ class ForwardInstData /* : public ReportIF, public BubbleIF */
     ThreadID threadId;
 
     /** Output of LVPT for PC */
-    bool lvptOutPredict;
-    bool lvptOutConstant;
-    unsigned long lvptOutValue;
-    unsigned int lvptOutPC;
-    unsigned int lvptOutIndex;
-    unsigned int lvptOutAddr;
-    unsigned int lvptOutCounter;
+    bool lvptOutPredict = false;
+    bool lvptOutConstant = false;
+    unsigned long lvptOutValue = 0;
+    unsigned long lvptOutPC = 0;
+    unsigned long lvptOutIndex = 0;
+    unsigned long lvptOutAddr = 0;
+    unsigned int lvptOutCounter = 0;
 
   public:
     explicit ForwardInstData(unsigned int width = 0,

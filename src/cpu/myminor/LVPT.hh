@@ -28,8 +28,8 @@ public:
     struct tableEntry
     {
         bool         valid;
-        unsigned int tag;
-        unsigned int addr;
+        unsigned long tag;
+        unsigned long addr;
         unsigned long value;
     };
 
@@ -39,9 +39,9 @@ public:
         bool constant;
         bool predict;
         unsigned long value;
-        unsigned int pc;
-        unsigned int addr;
-        unsigned int index;
+        unsigned long pc;
+        unsigned long addr;
+        unsigned long index;
     };
 
     // std::vector<tableEntry> valueTable (tableSize, 0);
@@ -55,11 +55,11 @@ public:
 
     // virtual ~LVPT();
 
-    void updateTable(unsigned long data, unsigned int addr, unsigned int pc, bool predict, bool constant);
+    void updateTable(unsigned long data, unsigned long addr, unsigned long pc, bool predict, bool constant);
 
     /** Table access here for given PC */
-    void read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned long& outDataValue,
-        unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr, unsigned int& outDataCounter);
+    void read(unsigned long pc, bool& outDataPredict, bool& outDataConstant, unsigned long& outDataValue,
+        unsigned long& outDataPC, unsigned long& outDataIndex, unsigned long& outDataAddr, unsigned int& outDataCounter);
 
 };
 

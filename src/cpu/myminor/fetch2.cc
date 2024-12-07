@@ -48,6 +48,7 @@
 #include "debug/Branch.hh"
 #include "debug/Fetch.hh"
 #include "debug/MyMinorTrace.hh"
+#include "debug/LVP.hh"
 
 namespace gem5
 {
@@ -416,6 +417,10 @@ Fetch2::evaluate()
                     dyn_inst->lvptOutIndex = line_in->lvptOutIndex;
                     dyn_inst->lvptOutAddr = line_in->lvptOutAddr;
                     dyn_inst->lvptOutCounter = line_in->lvptOutCounter;
+                    if (dyn_inst->staticInst->isLoad()) {
+                        DPRINTF(LVP, "\nChecking lvpt table output in Fetch2\nPredict: %d\nConstant %d\nValue: 0x%x\nPC: 0x%x\nlvptOutIndex: %d\nlvptOutAddr: 0x%x\nCounter: %d\n", 
+                            dyn_inst->lvptOutPredict, dyn_inst->lvptOutConstant, dyn_inst->lvptOutValue, dyn_inst->lvptOutPC, dyn_inst->lvptOutIndex, dyn_inst->lvptOutAddr, dyn_inst->lvptOutCounter);
+                    }
 
                     /* To complete the set, test that exec sequence number
                      *  has not been set */

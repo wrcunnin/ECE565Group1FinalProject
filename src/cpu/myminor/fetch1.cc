@@ -555,13 +555,6 @@ Fetch1::processResponse(Fetch1::FetchRequestPtr response,
     set(line.pc, thread.pc);
     /* Set fetch address to virtual address */
     line.fetchAddr = response->pc;
-    /* Get LVPT output */
-    DPRINTF(LVP, "\nChecking lvpt table output\nFetchAddr: %d\nPredict: %d\nConstant %d\nValue: %d\nPC: %d\nlvptOutIndex: %d\nlvptOutAddr: %d\nCounter: %d", 
-    line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
-        line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr, line.lvptOutCounter);
-
-    lvpt.read(line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
-        line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr, line.lvptOutCounter);
     /* Set the lineBase, which is a sizeof(MachInst) aligned address <=
      *  pc.instAddr() */
     line.lineBaseAddr = response->request->getVaddr();
@@ -580,6 +573,13 @@ Fetch1::processResponse(Fetch1::FetchRequestPtr response,
          *  deallocate the packet */
         response->packet = NULL;
     }
+    /* Get LVPT output */
+    lvpt.read(line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
+        line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr, line.lvptOutCounter);
+
+    DPRINTF(LVP, "\nChecking lvpt table output in Fetch1\nFetchAddr: %d\nPredict: %d\nConstant %d\nValue: %d\nPC: %d\nlvptOutIndex: %d\nlvptOutAddr: %d\nCounter: %d\n", 
+    line.fetchAddr, line.lvptOutPredict, line.lvptOutConstant,
+        line.lvptOutValue, line.lvptOutPC, line.lvptOutIndex, line.lvptOutAddr, line.lvptOutCounter);
 }
 
 void

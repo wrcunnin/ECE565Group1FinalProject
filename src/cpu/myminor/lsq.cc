@@ -1597,10 +1597,12 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
         return inst->translationFault;
     }
 
-    bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
+    DPRINTF(LVP, "\nChecking lvpt table output in LSQ\nPredict: %d\nConstant %d\nValue: %d\nPC: %d\nlvptOutIndex: %d\nlvptOutAddr: %d\nCounter: %d\n", 
+                        inst->lvptOutPredict, inst->lvptOutConstant, inst->lvptOutValue, inst->lvptOutPC, inst->lvptOutIndex, inst->lvptOutAddr, inst->lvptOutCounter);
 
+    bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
     bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex, inst->lvptOutConstant);
-    DPRINTF(LVP, "\nEntry in CVU: %d", entry_in_CVU);
+    DPRINTF(LVP, "\nEntry in CVU: %d\n", entry_in_CVU);
 
     if (needs_burst && inst->staticInst->isAtomic()) {
         // AMO requests that access across a cache line boundary are not
@@ -1638,6 +1640,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     }
 
     /* check for value in CVU if load and constant */
+    DPRINTF(LVP, "\nisLoad: %d\ninst->lvptOutConstant: %d\nentry_in_CVU %d\n", isLoad, inst->lvptOutConstant, entry_in_CVU);
     if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
         /* use predicted value for this */
         std::memcpy(request_data, (void*)(&(inst->lvptOutValue)), size);

@@ -41,15 +41,16 @@ LVPT::LVPT(const BaseMyMinorCPUParams &params) :
 }
 
 void
-LVPT::updateTable(unsigned long data, unsigned int addr, unsigned int pc, bool predict, bool constant)
+LVPT::updateTable(unsigned long data, unsigned long addr, unsigned long pc, bool predict, bool constant)
 {
   // value table
-  unsigned int numIndexBits = log2(tableSize);
-  unsigned int numLCTBits = numIndexBits - 2;
-  unsigned int indexMask = ((0x1 << numIndexBits) - 1);
-  unsigned int index = (pc) & indexMask;
-  unsigned int indexLCT = pc >> (32 - numLCTBits);
-  unsigned int tag = (pc) & ~indexMask;
+  unsigned long numIndexBits = log2(tableSize);
+  unsigned long numLCTBits = numIndexBits - 2;
+  unsigned long indexMask = ((0x1 << numIndexBits) - 1);
+  unsigned long index = (pc) & indexMask;
+  // unsigned long indexLCT = pc >> (32 - numLCTBits);
+  unsigned long indexLCT = ((pc) & indexMask) >> 2;
+  unsigned long tag = (pc) & ~indexMask;
 
   tableEntry entry = valueTable[index];
   unsigned int prediction = predictTable[indexLCT];
@@ -82,16 +83,17 @@ LVPT::updateTable(unsigned long data, unsigned int addr, unsigned int pc, bool p
 }
 
 void
-LVPT::read(unsigned int pc, bool& outDataPredict, bool& outDataConstant, unsigned long& outDataValue,
-           unsigned int& outDataPC, unsigned int& outDataIndex, unsigned int& outDataAddr, unsigned int& outDataCounter)
+LVPT::read(unsigned long pc, bool& outDataPredict, bool& outDataConstant, unsigned long& outDataValue,
+           unsigned long& outDataPC, unsigned long& outDataIndex, unsigned long& outDataAddr, unsigned int& outDataCounter)
 {
   // value table
-  unsigned int numIndexBits = log2(tableSize);
-  unsigned int numLCTBits = numIndexBits - 2;
-  unsigned int indexMask = ((0x1 << numIndexBits) - 1);
-  unsigned int index = (pc) & indexMask;
-  unsigned int indexLCT = pc >> (32 - numLCTBits);
-  unsigned int tag = (pc) & ~indexMask;
+  unsigned long numIndexBits = log2(tableSize);
+  unsigned long numLCTBits = numIndexBits - 2;
+  unsigned long indexMask = ((0x1 << numIndexBits) - 1);
+  unsigned long index = (pc) & indexMask;
+  // unsigned long indexLCT = pc >> (32 - numLCTBits);
+  unsigned long indexLCT = ((pc) & indexMask) >> 2;
+  unsigned long tag = (pc) & ~indexMask;
 
   tableEntry entry = valueTable[index];
   unsigned int predict = predictTable[indexLCT];

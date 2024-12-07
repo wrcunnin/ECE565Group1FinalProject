@@ -44,7 +44,7 @@ CVU::CVU(unsigned int cvu_table_size,
 }
 
 void
-CVU::storeInvalidate(unsigned int address)
+CVU::storeInvalidate(unsigned long address)
 {
   for (unsigned int hitIndex = 0; hitIndex < tableSize; hitIndex++) {
     tableEntry entry = cvuTable[hitIndex];
@@ -64,9 +64,14 @@ CVU::AddToInvalidateList(unsigned int TableIndex){
 }
 
 void
-CVU::AddEntryToCVU(unsigned long data, unsigned int LVPT_Index, unsigned int Translated_Data_Address){
+CVU::AddEntryToCVU(unsigned long data, unsigned long LVPT_Index, unsigned long Translated_Data_Address){
 
-  tableEntry newEntry = {true, Translated_Data_Address, LVPT_Index, data};
+  // tableEntry newEntry = {.valid=true, Translated_Data_Address, LVPT_Index, data};
+  tableEntry newEntry;
+  newEntry.valid = true;
+  newEntry.addr  = Translated_Data_Address;
+  newEntry.index = LVPT_Index;
+  newEntry.data  = data;
   unsigned int new_entry_index;
 
   bool random = false;
@@ -86,7 +91,7 @@ CVU::AddEntryToCVU(unsigned long data, unsigned int LVPT_Index, unsigned int Tra
 }
 
 bool
-CVU::verifyEntryInCVU(unsigned int address, unsigned int index, bool constant)
+CVU::verifyEntryInCVU(unsigned long address, unsigned long index, bool constant)
 {
   // declarations
   unsigned int hitIndex = tableSize;
@@ -95,11 +100,15 @@ CVU::verifyEntryInCVU(unsigned int address, unsigned int index, bool constant)
   if (constant) {
     for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
       tableEntry entry = cvuTable[hitIndex];
+      if (entry.valid)
+        DPRINTF(LVP, "\n----verifyEntryInCVU::LOOP----\nhitIndex: %d\nentry.valid: %d\nentry.addr: 0x%x\nentry.index: 0x%x\n", hitIndex, entry.valid ? 1 : 0, entry.addr, entry.index);
       if (entry.valid && (entry.addr == address) && (entry.index == index)) {
         break;
       }
     }
   }
+
+  DPRINTF(LVP, "\n----verifyEntryInCVU----\nhitIndex: %d\naddress: 0x%x\nindex: 0x%x\nconstant: %d\n", hitIndex, address, index, constant ? 1 : 0);
 
   return hitIndex < tableSize;
 }
@@ -110,7 +119,7 @@ CVU::printCVUEntries(){
 
   for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
     tableEntry entry = cvuTable[hitIndex];
-    DPRINTF(LVP, "\nIndex: %u\tvalid: %d\taddr: %u\tindex: %u\tdata: %lu ", hitIndex, entry.valid, entry.addr, entry.index, entry.data);
+    DPRINTF(LVP, "\nIndex: %u\tvalid: %u\taddr: %u\tindex: %u\tdata: %lu ", hitIndex, entry.valid, entry.addr, entry.index, entry.data);
   }
 }
 

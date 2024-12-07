@@ -346,6 +346,11 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
     bool is_prefetch = inst->staticInst->isDataPrefetch();
     bool is_constant = inst->lvptOutConstant;
 
+    if (is_load) {
+        DPRINTF(LVP, "\nChecking lvpt table output in handleMemResponse\nPredict: %d\nConstant %d\nValue: 0x%x\nPC: 0x%x\nlvptOutIndex: %d\nlvptOutAddr: 0x%x\nCounter: %d\n", 
+            inst->lvptOutPredict, inst->lvptOutConstant, inst->lvptOutValue, inst->lvptOutPC, inst->lvptOutIndex, inst->lvptOutAddr, inst->lvptOutCounter);
+    }
+
     /* If true, the trace's predicate value will be taken from the exec
      *  context predicate, otherwise, it will be set to false */
     bool use_context_predicate = true;
@@ -404,10 +409,10 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
         // access_pc = passed_lvpt_pc;
 
         // If the LVPT told us to predict
-        if (inst->lvptOutPredict) {
+        if (is_load) {
             // If MEM Data == prediction
             // if (*packetdataptr == inst->lvptOutValue){ //change prediciton to something real
-            if (packetdata == inst->lvptOutValue){ //change prediciton to something real
+            if (inst->lvptOutPredict && packetdata == inst->lvptOutValue){ //change prediciton to something real
                 // Increase counter in LVPT
                 change_counter = 1;
                 DPRINTF(LVP, "\nPacket match - increasing threshold for PC: %u", inst->pc->instAddr());
@@ -508,6 +513,11 @@ Execute::executeMemRefInst(MyMinorDynInstPtr inst, BranchData &branch,
     bool &passed_predicate, Fault &fault)
 {
     bool issued = false;
+
+    if (inst->staticInst->isLoad()) {
+        DPRINTF(LVP, "\nChecking lvpt table output in executeMemRefInst\nPredict: %d\nConstant %d\nValue: 0x%x\nPC: 0x%x\nlvptOutIndex: %d\nlvptOutAddr: 0x%x\nCounter: %d\n", 
+            inst->lvptOutPredict, inst->lvptOutConstant, inst->lvptOutValue, inst->lvptOutPC, inst->lvptOutIndex, inst->lvptOutAddr, inst->lvptOutCounter);
+    }
 
     /* Set to true if the mem op is issued and sent to the mem system */
     passed_predicate = false;
