@@ -239,7 +239,7 @@ class BaseMyMinorCPU(BaseCPU):
         " signalling (0 means in the same cycle, 1 mean the next cycle)")
     tableSizeLVPT = Param.Unsigned(1024,
         "Total number of LVPT entries")
-    thresholdLCT = Param.Unsigned(2,
+    thresholdLCT = Param.Unsigned(3,
         "Threshold for LVPT entry to be considered a constant")
     maxValueLCT = Param.Unsigned(3,
         "Maximum value the LCT can count to")

@@ -119,7 +119,7 @@ CVU::printCVUEntries(){
 
   for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
     tableEntry entry = cvuTable[hitIndex];
-    DPRINTF(LVP, "\nIndex: %u\tvalid: %u\taddr: %u\tindex: %u\tdata: %lu ", hitIndex, entry.valid, entry.addr, entry.index, entry.data);
+    DPRINTF(LVP, "\nIndex: %u\tvalid: %u\taddr: 0x%x\tindex: 0x%x\tdata: 0x%x ", hitIndex, entry.valid, entry.addr, entry.index, entry.data);
   }
 }
 

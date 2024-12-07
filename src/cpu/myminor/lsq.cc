@@ -1602,7 +1602,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
 
     bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
     bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex, inst->lvptOutConstant);
-    DPRINTF(LVP, "\nEntry in CVU: %d\n", entry_in_CVU);
+    // DPRINTF(LVP, "\nEntry in CVU: %d\n", entry_in_CVU);
 
     if (needs_burst && inst->staticInst->isAtomic()) {
         // AMO requests that access across a cache line boundary are not
@@ -1641,9 +1641,14 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
 
     /* check for value in CVU if load and constant */
     DPRINTF(LVP, "\nisLoad: %d\ninst->lvptOutConstant: %d\nentry_in_CVU %d\n", isLoad, inst->lvptOutConstant, entry_in_CVU);
+    if (isLoad && inst->lvptOutConstant) {
+        cvu.printCVUEntries();
+    }
     if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
         /* use predicted value for this */
-        std::memcpy(request_data, (void*)(&(inst->lvptOutValue)), size);
+        request_data = new uint8_t[size];
+        DPRINTF(LVP, "\nBefore memcpy:\n\tptr: 0x%x,\n\tval: \n\tsize: ", &(inst->lvptOutValue), inst->lvptOutValue, size);
+        std::memcpy(request_data, (uint8_t *)(&(inst->lvptOutValue)), size);
         DPRINTF(LVP, "\nUSING CVU VALUE: %lu", *request_data);
 
     }

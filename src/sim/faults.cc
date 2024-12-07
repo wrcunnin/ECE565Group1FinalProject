@@ -47,6 +47,7 @@
 #include "cpu/base.hh"
 #include "cpu/thread_context.hh"
 #include "debug/Faults.hh"
+#include "debug/LVP.hh"
 #include "mem/page_table.hh"
 #include "sim/full_system.hh"
 #include "sim/process.hh"
@@ -98,6 +99,7 @@ GenericPageTableFault::invoke(ThreadContext *tc, const StaticInstPtr &inst)
     if (!FullSystem) {
         Process *p = tc->getProcessPtr();
         handled = p->fixupFault(vaddr);
+        DPRINTF(LVP, "\nhandled GenericPageTableFault for proccess %p : %d\n", p, handled);
     }
     panic_if(!handled &&
                  !tc->getSystemPtr()->trapToGdb(SIGSEGV, tc->contextId()),

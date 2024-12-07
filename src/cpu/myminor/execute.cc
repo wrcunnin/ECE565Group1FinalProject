@@ -420,9 +420,10 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
                 if (inst->lvptOutCounter == thresholdLCT - 1) {
                     // DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
                     // lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
+                    DPRINTF(LVP, "\nChecking vaddr vs paddr:\n\tvaddr 0x%x\n\tpaddr 0x%x\n", packet->req->getVaddr(), packet->req->getPaddr());
                     DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, packetdata, inst->lvptOutIndex, packet->getAddr());
                     lsq.cvu.printCVUEntries();
-                    lsq.cvu.AddEntryToCVU(packetdata, inst->lvptOutIndex, packet->getAddr());
+                    lsq.cvu.AddEntryToCVU(packetdata, inst->lvptOutIndex, packet->req->getVaddr());
                     lsq.cvu.printCVUEntries();
                 }
             // else (MEM Data != prediction)
@@ -434,20 +435,21 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             // decrease counter in LVPT
         if (fault != NoFault) {
             /* Invoke fault created by instruction completion */
-            DPRINTF(MyMinorMem, "Fault in memory completeAcc: %s\n",
+            DPRINTF(LVP, "Fault in memory completeAcc: %s\n",
                 fault->name());
+
             fault->invoke(thread, inst->staticInst);
         } else {
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
             if (response->needsToBeSentToStoreBuffer()) {
-                lsq.cvu.storeInvalidate(packet->getAddr()); //get the virtual address here!!
+                lsq.cvu.storeInvalidate(packet->req->getVaddr()); //get the virtual address here!!
                 lsq.sendStoreToStoreBuffer(response);
             }
             
             /* update outputs to LVPT */
             branch.lvptInPC = inst->pc->instAddr();
-            branch.lvptInAddr = (unsigned int) (packet->getAddr());
+            branch.lvptInAddr = (unsigned int) (packet->req->getVaddr());
             // branch.lvptInValue = (unsigned long) (*((unsigned long *)(packetdataptr)));      
             branch.lvptInValue = packetdata;      
             branch.lvptInPredict = change_counter == 1; // this should increase the counter
