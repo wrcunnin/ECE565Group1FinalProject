@@ -471,6 +471,8 @@ class Request
     HtmFailureFaultCause _htmAbortCause = HtmFailureFaultCause::INVALID;
 
   public:
+    /** Was the request a constant from the CVU? */
+    bool use_CVU_value = false;
 
     /**
      * Minimal constructor. No fields are initialized. (Note that
@@ -513,6 +515,7 @@ class Request
           _extraData(other._extraData), _contextId(other._contextId),
           _pc(other._pc), _reqInstSeqNum(other._reqInstSeqNum),
           _localAccessor(other._localAccessor),
+          use_CVU_value(other.use_CVU_value),
           translateDelta(other.translateDelta),
           accessDelta(other.accessDelta), depth(other.depth)
     {

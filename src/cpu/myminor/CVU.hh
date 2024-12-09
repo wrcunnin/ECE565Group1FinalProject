@@ -31,7 +31,8 @@ public:
     struct tableEntry
     {
         bool         valid;
-        unsigned long addr;
+        unsigned long vaddr;
+        unsigned long paddr;
         unsigned long index;
         unsigned long data;
     };
@@ -45,15 +46,15 @@ public:
 
     // virtual ~CVU();
 
-    void storeInvalidate(unsigned long address);
+    void storeInvalidate(unsigned long vaddr, unsigned long paddr);
     // Invalidate all matching addresses on a store
 
     /** Table access here for given PC */
-    bool verifyEntryInCVU(unsigned long address, unsigned long index, bool constant);
+    bool verifyEntryInCVU(unsigned long address, unsigned long index, unsigned long data, bool constant, unsigned long &paddr);
 
     void AddToInvalidateList(unsigned int TableIndex);
     
-    void AddEntryToCVU(unsigned long data, unsigned long LVPT_Index, unsigned long Translated_Data_Address);
+    void AddEntryToCVU(unsigned long data, unsigned long LVPT_Index, unsigned long vaddr, unsigned long paddr);
 
     void printCVUEntries();
 };

@@ -385,15 +385,26 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
     } else if (is_store || is_load || is_prefetch || is_atomic) {
         assert(packet);
 
+        unsigned long temp_cvu_paddr;
+        bool entry_in_cvu = lsq.cvu.verifyEntryInCVU(packet->req->getVaddr(), inst->lvptOutIndex, inst->lvptOutValue, inst->lvptOutConstant, temp_cvu_paddr);
+        if (entry_in_cvu) {
+            DPRINTF(LVP, "before deleting packet data array\n");
+            delete [] packet->data; // delete the data if there is any?
+            DPRINTF(LVP, "before setting packet flags\n");
+            packet->flags.set(0x00002000); // DYNAMIC_DATA = 0x00002000
+            DPRINTF(LVP, "before setting packet data to new array\n");
+            packet->data = new uint8_t[packet->getSize()];
+            DPRINTF(LVP, "before copying lvptOutValue to packet data\n");
+            std::memcpy(packet->data, (uint8_t *)(&(inst->lvptOutValue)), packet->getSize());
+        }
+
         DPRINTF(MyMinorMem, "Memory response inst: %s addr: 0x%x size: %d\n",
             *inst, packet->getAddr(), packet->getSize());
-        if (is_load && is_constant) {
-            DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n", inst->lvptOutValue);
-        } else if (is_load && packet->getSize() > 0) {
+        if (is_load && packet->getSize() > 0) {
             DPRINTF(MyMinorMem, "Memory data[0]: 0x%x\n",
                 static_cast<unsigned int>(packet->getConstPtr<uint8_t>()[0]));
         }
-
+        
         /* Complete the memory access instruction */
         fault = inst->staticInst->completeAcc(packet, &context,
             inst->traceData);
@@ -417,14 +428,22 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
                 change_counter = 1;
                 DPRINTF(LVP, "\nPacket match - increasing threshold for PC: %u", inst->pc->instAddr());
                 // If threshhold is now at constant value, add to CVU
-                if (inst->lvptOutCounter == thresholdLCT - 1) {
+                if (inst->lvptOutCounter == thresholdLCT) {
                     // DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, *packetdataptr, inst->lvptOutIndex, packet->getAddr());
                     // lsq.cvu.AddEntryToCVU(*packetdataptr, inst->lvptOutIndex, packet->getAddr());
                     DPRINTF(LVP, "\nChecking vaddr vs paddr:\n\tvaddr 0x%x\n\tpaddr 0x%x\n", packet->req->getVaddr(), packet->req->getPaddr());
                     DPRINTF(LVP, "\nLVPTEntry now at constant threshold: %d \nadding data: %d\nAdding Index %d\nAdding Address %d", inst->lvptOutCounter, packetdata, inst->lvptOutIndex, packet->getAddr());
-                    lsq.cvu.printCVUEntries();
-                    lsq.cvu.AddEntryToCVU(packetdata, inst->lvptOutIndex, packet->req->getVaddr());
-                    lsq.cvu.printCVUEntries();
+                    
+                    if (!lsq.cvu.verifyEntryInCVU(packet->req->getVaddr(), inst->lvptOutIndex, inst->lvptOutValue, true, temp_cvu_paddr)) {
+                        DPRINTF(LVP, "\nEntry not in CVU, adding entries\n");
+                        lsq.cvu.printCVUEntries();
+                        lsq.cvu.AddEntryToCVU(packetdata, inst->lvptOutIndex, packet->req->getVaddr(), packet->req->getPaddr());
+                        lsq.cvu.printCVUEntries();
+                    } else {
+                        DPRINTF(LVP, "\nEntry already in CVU, not adding entries\n");
+                        lsq.cvu.printCVUEntries();
+                    }
+                    
                 }
             // else (MEM Data != prediction)
             } else {
@@ -443,7 +462,7 @@ Execute::handleMemResponse(MyMinorDynInstPtr inst,
             /* Stores need to be pushed into the store buffer to finish
              *  them off */
             if (response->needsToBeSentToStoreBuffer()) {
-                lsq.cvu.storeInvalidate(packet->req->getVaddr()); //get the virtual address here!!
+                lsq.cvu.storeInvalidate(packet->req->getVaddr(), packet->req->getPaddr()); //get the virtual address here!!
                 lsq.sendStoreToStoreBuffer(response);
             }
             
@@ -1163,7 +1182,7 @@ Execute::commit(ThreadID thread_id, bool only_commit_microops, bool discard,
                 " interrupt: %s\n",
                 *(ex_info.inFlightInsts->front().inst));
         }
-
+        
         QueuedInst *head_inflight_inst = &(ex_info.inFlightInsts->front());
 
         InstSeqNum head_exec_seq_num =

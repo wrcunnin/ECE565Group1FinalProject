@@ -360,9 +360,9 @@ class Packet : public Printable
         BLOCK_CACHED          = 0x00010000
     };
 
+  public:
     Flags flags;
 
-  public:
     typedef MemCmd::Command Command;
 
     /// The command field of the packet.

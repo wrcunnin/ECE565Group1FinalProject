@@ -44,16 +44,16 @@ CVU::CVU(unsigned int cvu_table_size,
 }
 
 void
-CVU::storeInvalidate(unsigned long address)
+CVU::storeInvalidate(unsigned long vaddr, unsigned long paddr)
 {
   for (unsigned int hitIndex = 0; hitIndex < tableSize; hitIndex++) {
     tableEntry entry = cvuTable[hitIndex];
-    if(entry.addr == address){
+    if(entry.vaddr == vaddr || entry.paddr == paddr){
         entry.valid = false;
         cvuTable[hitIndex].valid = false; // I am so stupid!!!
         printCVUEntries();
         AddToInvalidateList(hitIndex);
-        DPRINTF(LVP, "Adding value to Invalidate list %u\t addr: %u", hitIndex, address);
+        DPRINTF(LVP, "Adding value to Invalidate list %u\t vaddr: 0x%x\t paddr: 0x%x", hitIndex, vaddr, paddr);
     }
   }
 }
@@ -64,12 +64,13 @@ CVU::AddToInvalidateList(unsigned int TableIndex){
 }
 
 void
-CVU::AddEntryToCVU(unsigned long data, unsigned long LVPT_Index, unsigned long Translated_Data_Address){
+CVU::AddEntryToCVU(unsigned long data, unsigned long LVPT_Index,  unsigned long vaddr, unsigned long paddr){
 
   // tableEntry newEntry = {.valid=true, Translated_Data_Address, LVPT_Index, data};
   tableEntry newEntry;
   newEntry.valid = true;
-  newEntry.addr  = Translated_Data_Address;
+  newEntry.vaddr  = vaddr;
+  newEntry.paddr  = paddr;
   newEntry.index = LVPT_Index;
   newEntry.data  = data;
   unsigned int new_entry_index;
@@ -91,7 +92,7 @@ CVU::AddEntryToCVU(unsigned long data, unsigned long LVPT_Index, unsigned long T
 }
 
 bool
-CVU::verifyEntryInCVU(unsigned long address, unsigned long index, bool constant)
+CVU::verifyEntryInCVU(unsigned long address, unsigned long index, unsigned long data, bool constant, unsigned long &paddr)
 {
   // declarations
   unsigned int hitIndex = tableSize;
@@ -101,8 +102,9 @@ CVU::verifyEntryInCVU(unsigned long address, unsigned long index, bool constant)
     for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
       tableEntry entry = cvuTable[hitIndex];
       if (entry.valid)
-        DPRINTF(LVP, "\n----verifyEntryInCVU::LOOP----\nhitIndex: %d\nentry.valid: %d\nentry.addr: 0x%x\nentry.index: 0x%x\n", hitIndex, entry.valid ? 1 : 0, entry.addr, entry.index);
-      if (entry.valid && (entry.addr == address) && (entry.index == index)) {
+        DPRINTF(LVP, "\n----verifyEntryInCVU::LOOP----\nhitIndex: %d\nentry.valid: %d\nentry.vaddr: 0x%x\nentry.index: 0x%x\n", hitIndex, entry.valid ? 1 : 0, entry.vaddr, entry.index);
+      if (entry.valid && (entry.vaddr == address) && (entry.index == index) && (entry.data == data)) {
+        paddr = entry.paddr;
         break;
       }
     }
@@ -119,7 +121,7 @@ CVU::printCVUEntries(){
 
   for (hitIndex = 0; hitIndex < tableSize; hitIndex++) {
     tableEntry entry = cvuTable[hitIndex];
-    DPRINTF(LVP, "\nIndex: %u\tvalid: %u\taddr: 0x%x\tindex: 0x%x\tdata: 0x%x ", hitIndex, entry.valid, entry.addr, entry.index, entry.data);
+    DPRINTF(LVP, "\nIndex: %u\tvalid: %u\tvaddr: 0x%x\tpaddr: 0x%x\tindex: 0x%x\tdata: 0x%x ", hitIndex, entry.valid, entry.vaddr, entry.paddr, entry.index, entry.data);
   }
 }
 

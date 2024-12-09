@@ -276,11 +276,14 @@ BaseCache::handleTimingReqHit(PacketPtr pkt, CacheBlk *blk, Tick request_time)
         }
     }
 
+    DPRINTF(Cache, "Checking if packet needs response\n");
     if (pkt->needsResponse()) {
         // These delays should have been consumed by now
+        DPRINTF(Cache, "Packet needs response\n");
         assert(pkt->headerDelay == 0);
         assert(pkt->payloadDelay == 0);
 
+        DPRINTF(Cache, "Making timing response\n");
         pkt->makeTimingResponse();
 
         // In this case we are considering request_time that takes
@@ -288,6 +291,7 @@ BaseCache::handleTimingReqHit(PacketPtr pkt, CacheBlk *blk, Tick request_time)
         // lat, neglecting responseLatency, modelling hit latency
         // just as the value of lat overriden by access(), which calls
         // the calculateAccessLatency() function.
+        DPRINTF(Cache, "Scheduling timing response\n");
         cpuSidePort.schedTimingResp(pkt, request_time);
     } else {
         DPRINTF(Cache, "%s satisfied %s, no response needed\n", __func__,
@@ -427,12 +431,16 @@ BaseCache::recvTimingReq(PacketPtr pkt)
         PacketList writebacks;
         // Note that lat is passed by reference here. The function
         // access() will set the lat value.
-        satisfied = access(pkt, blk, lat, writebacks);
-
-        // After the evicted blocks are selected, they must be forwarded
-        // to the write buffer to ensure they logically precede anything
-        // happening below
-        doWritebacks(writebacks, clockEdge(lat + forwardLatency));
+        if (pkt->isRequest() && pkt->req->use_CVU_value) {
+            satisfied = true;
+            DPRINTF(Cache, "Using CVU value inside the cache block here\n");
+        } else {
+            satisfied = access(pkt, blk, lat, writebacks);
+            // After the evicted blocks are selected, they must be forwarded
+            // to the write buffer to ensure they logically precede anything
+            // happening below
+            doWritebacks(writebacks, clockEdge(lat + forwardLatency));
+        }
     }
 
     // Here we charge the headerDelay that takes into account the latencies
@@ -440,21 +448,24 @@ BaseCache::recvTimingReq(PacketPtr pkt)
     // The latency charged is just the value set by the access() function.
     // In case of a hit we are neglecting response latency.
     // In case of a miss we are neglecting forward latency.
-    Tick request_time = clockEdge(lat);
+    Tick request_time = pkt->isRequest() && pkt->req->use_CVU_value ? clockEdge() : clockEdge(lat);
     // Here we reset the timing of the packet.
     pkt->headerDelay = pkt->payloadDelay = 0;
 
     if (satisfied) {
         // notify before anything else as later handleTimingReqHit might turn
         // the packet in a response
+        DPRINTF(Cache, "Notifying packet\n");
         ppHit->notify(pkt);
-
+        
+        DPRINTF(Cache, "Checking prefetcher\n");
         if (prefetcher && blk && blk->wasPrefetched()) {
             DPRINTF(Cache, "Hit on prefetch for addr %#x (%s)\n",
                     pkt->getAddr(), pkt->isSecure() ? "s" : "ns");
             blk->clearPrefetched();
         }
 
+        DPRINTF(Cache, "Handling timing request hit\n");
         handleTimingReqHit(pkt, blk, request_time);
     } else {
         handleTimingReqMiss(pkt, blk, forward_time, request_time);

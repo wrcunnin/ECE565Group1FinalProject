@@ -131,7 +131,6 @@ Decode::evaluate()
     /* Push input onto appropriate input buffer */
     if (!inp.outputWire->isBubble())
         inputBuffer[inp.outputWire->threadId].setTail(*inp.outputWire);
-
     ForwardInstData &insts_out = *out.inputWire;
 
     assert(insts_out.isBubble());
@@ -232,10 +231,10 @@ Decode::evaluate()
                     decode_info.inputIndex++;
                     decode_info.inMacroop = false;
                 }
-
+                
                 /* Set execSeqNum of output_inst */
                 output_inst->id.execSeqNum = decode_info.execSeqNum;
-
+                
                 /* Set LVPT values to output_inst */
                 output_inst->lvptOutPredict = inst->lvptOutPredict;
                 output_inst->lvptOutConstant = inst->lvptOutConstant;

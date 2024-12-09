@@ -292,6 +292,8 @@ LSQ::SingleDataRequest::finish(const Fault &fault_, const RequestPtr &request_,
     } else {
         setState(Translated);
         makePacket();
+        // if (request_->use_CVU_value)
+        //     packet->data = data;
     }
     port.tryToSendToTransfers(this);
 
@@ -734,8 +736,14 @@ LSQ::StoreBuffer::deleteRequest(LSQRequestPtr request)
         DPRINTF(MyMinorMem, "Deleting request: %s %s %s from StoreBuffer\n",
             request, *found, *(request->inst));
         slots.erase(found);
+        DPRINTF(MyMinorMem, "slots.erase(found) passed\n");
 
+        DPRINTF(MyMinorMem, "before deleting request\n");
+        // request = NULL;
         delete request;
+        DPRINTF(MyMinorMem, "after deleting request\n");
+
+        DPRINTF(MyMinorMem, "end of deleteRequest\n");
     }
 }
 
@@ -1600,8 +1608,9 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     DPRINTF(LVP, "\nChecking lvpt table output in LSQ\nPredict: %d\nConstant %d\nValue: %d\nPC: %d\nlvptOutIndex: %d\nlvptOutAddr: %d\nCounter: %d\n", 
                         inst->lvptOutPredict, inst->lvptOutConstant, inst->lvptOutValue, inst->lvptOutPC, inst->lvptOutIndex, inst->lvptOutAddr, inst->lvptOutCounter);
 
+    unsigned long CVU_paddr = 0;
     bool needs_burst = transferNeedsBurst(addr, size, lineWidth);
-    bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex, inst->lvptOutConstant);
+    bool entry_in_CVU = cvu.verifyEntryInCVU(addr, inst->lvptOutIndex, inst->lvptOutValue, inst->lvptOutConstant, CVU_paddr);
     // DPRINTF(LVP, "\nEntry in CVU: %d\n", entry_in_CVU);
 
     if (needs_burst && inst->staticInst->isAtomic()) {
@@ -1647,10 +1656,9 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
         /* use predicted value for this */
         request_data = new uint8_t[size];
-        DPRINTF(LVP, "\nBefore memcpy:\n\tptr: 0x%x,\n\tval: \n\tsize: ", &(inst->lvptOutValue), inst->lvptOutValue, size);
+        DPRINTF(LVP, "\nBefore memcpy:\n\tptr: 0x%x,\n\tval: 0x%x\n\tsize: 0x%x", (unsigned long) (&(inst->lvptOutValue)), inst->lvptOutValue, size);
         std::memcpy(request_data, (uint8_t *)(&(inst->lvptOutValue)), size);
-        DPRINTF(LVP, "\nUSING CVU VALUE: %lu", *request_data);
-
+        DPRINTF(LVP, "\nUSING CVU VALUE: 0x%x\n", *request_data);
     }
 
     if (needs_burst) {
@@ -1671,6 +1679,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
         /* I've no idea why we need the PC, but give it */
         inst->pc->instAddr(), std::move(amo_op));
     request->request->setByteEnable(byte_enable);
+    request->request->use_CVU_value = isLoad && inst->lvptOutConstant && entry_in_CVU;
 
     /* If the request is marked as NO_ACCESS, setup a local access
      * doing nothing */
@@ -1681,18 +1690,29 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
     }
 
     /* check for value in CVU if load and constant */
-    if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
-        /* set request to complete */
-        request->setState(LSQRequest::Complete);
-    }
+    // if (isLoad && inst->lvptOutConstant && entry_in_CVU) {
+    //     request->request->setPaddr(CVU_paddr);
+    //     request->makePacket();
+    //     if (request->packet) {
+    //         request->packet->data = (uint8_t *)(&(inst->lvptOutValue));
+    //     } else {
+    //         panic("request has no packet after calling makePacket");
+    //     }
+    // }
     
     requests.push(request);
     inst->inLSQ = true;
 
-    /* only start translation if value is not in the CVU */
-    if (!(isLoad && inst->lvptOutConstant && entry_in_CVU)) {
-        request->startAddrTranslation();
-    }
+    // /* only start translation if value is not in the CVU */
+    // if (!(isLoad && inst->lvptOutConstant && entry_in_CVU)) {
+    //     request->startAddrTranslation();
+    // }
+    // else {
+    //     request->setState(LSQ::Completed);
+    //     request->port.tryToSendToTransfers(request);
+    //     request->retireResponse(request->packet);
+    // }
+    request->startAddrTranslation();
 
     return inst->translationFault;
 }
