@@ -75,6 +75,26 @@ struct MyMinorStats : public statistics::Group
     /** Number of cycles in quiescent state */
     statistics::Scalar quiesceCycles;
 
+    /** Number of uses of constant Value in CVU - added */
+    statistics::Scalar CvuConstUse;
+
+    /** Number of entries added to CVU - added */
+    statistics::Scalar CvuTableAdditions;
+
+    /** Number of total correct predictions - added  */
+    statistics::Scalar lvptCorrectPred;
+
+    /** Number of total incorrect predictions - added  */
+    statistics::Scalar lvptInCorrectPred;
+
+    /** Number of total entries added to LVPT   */
+    statistics::Scalar lvptTableAdditions;
+
+    /** Number of total entries added to LCT  */
+    //statistics::Scalar lctTableAdditions; not applicable
+
+
+
     /** CPI/IPC for total cycle counts and macro insts */
     statistics::Formula cpi;
     statistics::Formula ipc;

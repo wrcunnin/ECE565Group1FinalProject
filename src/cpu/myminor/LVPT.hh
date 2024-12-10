@@ -25,6 +25,8 @@ public:
     unsigned int threshold;
     unsigned int maxValue;
 
+    MyMinorCPU &cpu;
+
     struct tableEntry
     {
         bool         valid;
@@ -51,7 +53,7 @@ public:
     std::vector<unsigned int> predictTable;
 
 public:
-    LVPT(const BaseMyMinorCPUParams &params);
+    LVPT(const BaseMyMinorCPUParams &params, MyMinorCPU &cpu_);
 
     // virtual ~LVPT();
 
