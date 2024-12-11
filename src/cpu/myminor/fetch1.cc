@@ -84,7 +84,7 @@ Fetch1::Fetch1(const std::string &name_,
     lineSeqNum(InstId::firstLineSeqNum),
     numFetchesInMemorySystem(0),
     numFetchesInITLB(0),
-    lvpt(params)
+    lvpt(params, cpu_)
 {
     for (auto &info: fetchInfo)
         info.pc.reset(params.isa[0]->newPCState());

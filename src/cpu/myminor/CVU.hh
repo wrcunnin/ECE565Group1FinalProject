@@ -10,6 +10,7 @@
 #include "cpu/myminor/buffers.hh"
 #include "cpu/myminor/cpu.hh"
 #include "cpu/myminor/pipe_data.hh"
+#include "params/BaseMyMinorCPU.hh"
 
 
 namespace gem5
@@ -27,6 +28,8 @@ public:
     unsigned int maxValue;
     std::list<unsigned int> InvalidEntries;
 
+    MyMinorCPU &cpu;
+
 
     struct tableEntry
     {
@@ -42,7 +45,8 @@ public:
 
     CVU(unsigned int cvu_table_size,
         unsigned int lct_threshold,
-        unsigned int lct_maxvalue);
+        unsigned int lct_maxvalue,
+        MyMinorCPU &cpu_);
 
     // virtual ~CVU();
 

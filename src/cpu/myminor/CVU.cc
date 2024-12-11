@@ -29,7 +29,8 @@ namespace myminor
 
 CVU::CVU(unsigned int cvu_table_size,
         unsigned int lct_threshold,
-        unsigned int lct_maxvalue) :
+        unsigned int lct_maxvalue, MyMinorCPU &cpu_) :
+  cpu(cpu_),
   tableSize(cvu_table_size),
   threshold(lct_threshold),
   maxValue(lct_maxvalue),
@@ -89,6 +90,7 @@ CVU::AddEntryToCVU(unsigned long data, unsigned long LVPT_Index,  unsigned long 
 
   cvuTable[new_entry_index] = newEntry;
   DPRINTF(LVP, "\nAdding new entry to CVU at index: %u using random %d, InvalidEntries Size: %d", new_entry_index, random, InvalidEntries.size());
+  cpu.stats.CvuTableAdditions++;
 }
 
 bool

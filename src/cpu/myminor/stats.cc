@@ -65,7 +65,24 @@ MyMinorStats::MyMinorStats(BaseCPU *base_cpu)
                 statistics::units::Count, statistics::units::Cycle>::get(),
              "IPC: instructions per cycle"),
     ADD_STAT(committedInstType, statistics::units::Count::get(),
-             "Class of committed instruction")
+             "Class of committed instruction"),
+    ADD_STAT(CvuConstUse, statistics::units::Count::get(),
+             "Number of uses of constant Value in CVU"),
+    ADD_STAT(CvuTableAdditions, statistics::units::Count::get(),
+             "Number of entries added to CVU"),
+    ADD_STAT(lvptCorrectPred, statistics::units::Count::get(),
+             "Number of total correct predictions"),
+    ADD_STAT(lvptInCorrectPred, statistics::units::Count::get(),
+             "Number of total incorrect predictions"),
+    ADD_STAT(lvptTableAdditions, statistics::units::Count::get(),
+             "Number of total entries added to LVPT")
+  //ADD_STAT(CvuTopUses, statistics::units::Count::get(),
+  //            "Most number of times a CVU entry got used"), 
+  // not easily implemented without adding counter to structure
+  // Potential slowdown??
+    
+  //ADD_STAT(lctTableAdditions, statistics::units::Count::get(),
+  //            "Number of total entries added to LCT"),
 {
     quiesceCycles.prereq(quiesceCycles);
 

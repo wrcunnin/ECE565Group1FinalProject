@@ -50,6 +50,7 @@
 #include "debug/Activity.hh"
 #include "debug/MyMinorMem.hh"
 #include "debug/LVP.hh"
+#include "cpu/myminor/cpu.hh"
 
 namespace gem5
 {
@@ -1436,7 +1437,7 @@ LSQ::LSQ(std::string name_, std::string dcache_port_name_,
     numAccessesIssuedToMemory(0),
     retryRequest(NULL),
     cacheBlockMask(~(cpu_.cacheLineSize() - 1)),
-    cvu(cvu_table_size, lct_threshold, lct_maxvalue)
+    cvu(cvu_table_size, lct_threshold, lct_maxvalue, cpu_)
 {
     if (in_memory_system_limit < 1) {
         fatal("%s: executeMaxAccessesInMemory must be >= 1 (%d)\n", name_,
@@ -1659,6 +1660,7 @@ LSQ::pushRequest(MyMinorDynInstPtr inst, bool isLoad, uint8_t *data,
         DPRINTF(LVP, "\nBefore memcpy:\n\tptr: 0x%x,\n\tval: 0x%x\n\tsize: 0x%x", (unsigned long) (&(inst->lvptOutValue)), inst->lvptOutValue, size);
         std::memcpy(request_data, (uint8_t *)(&(inst->lvptOutValue)), size);
         DPRINTF(LVP, "\nUSING CVU VALUE: 0x%x\n", *request_data);
+        cpu.stats.CvuConstUse++;
     }
 
     if (needs_burst) {

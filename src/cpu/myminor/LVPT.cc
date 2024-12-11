@@ -25,10 +25,11 @@ GEM5_DEPRECATED_NAMESPACE(MyMinor, myminor);
 namespace myminor
 {
 
-LVPT::LVPT(const BaseMyMinorCPUParams &params) :
+LVPT::LVPT(const BaseMyMinorCPUParams &params, MyMinorCPU &cpu_) :
   tableSize(params.tableSizeLVPT),
   threshold(params.thresholdLCT),
   maxValue(params.maxValueLCT),
+  cpu(cpu_),
   valueTable(),
   predictTable()
 {
@@ -63,6 +64,7 @@ LVPT::updateTable(unsigned long data, unsigned long addr, unsigned long pc, bool
     {
       // update LCT
       DPRINTF(LVP, "\nDecreasing LCT value to %u ", prediction == 0 ? 0 : prediction - 1);
+      cpu.stats.lvptInCorrectPred++;
       predictTable[indexLCT] = prediction == 0 ? 0 : prediction - 1;
 
       // update LVPT
@@ -70,6 +72,9 @@ LVPT::updateTable(unsigned long data, unsigned long addr, unsigned long pc, bool
       entry.value = data;
       entry.addr  = addr;
       entry.tag   = tag;
+      if(valueTable[index].tag != entry.tag || valueTable[index].valid == false){
+        cpu.stats.lvptTableAdditions++;
+      }
       valueTable[index] = entry;
 
     }
@@ -78,6 +83,7 @@ LVPT::updateTable(unsigned long data, unsigned long addr, unsigned long pc, bool
       // update LCT
       predictTable[indexLCT] = prediction >= maxValue ? prediction : prediction + 1;
       DPRINTF(LVP, "\nIncreasing LCT value to %u ", prediction >= maxValue ? prediction : prediction + 1);
+      cpu.stats.lvptCorrectPred++;
     }
   }
 }
